@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ToDo</string>
+    <string name="task_name">할 일</string>
+    <string name="task_place">장소</string>
 </resources>
