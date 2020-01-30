@@ -1,10 +1,10 @@
 package com.example.todo;
 
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -13,9 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
-    interface OnItemClickListener {
-        void onItemClick(View v, int pos);
-    }
     ArrayList<TaskItem> item_list;
     OnItemClickListener itemClickListener = null;
 
@@ -27,10 +24,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     }
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView text_task;
-        CheckBox ckbox_task;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            ckbox_task = itemView.findViewById(R.id.item_checkbox);
             text_task = itemView.findViewById(R.id.item_task);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -38,14 +33,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         itemClickListener.onItemClick(view, pos);
-                        if (ckbox_task.isChecked()) {
-                            ckbox_task.setChecked(false);
+                        if (item_list.get(pos).isDone == 1) {
                             text_task.setPaintFlags(0);
+                            item_list.get(pos).setDone(0);
                         } else {
-                            ckbox_task.setChecked(true);
                             text_task.setPaintFlags(text_task.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                            item_list.get(pos).setDone(1);
                         }
-
                     }
                 }
             });
@@ -65,6 +59,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
         String task_name = item_list.get(position).getTask();
         viewHolder.text_task.setText(task_name);
+        int isDone = item_list.get(position).getDone();
+        if (isDone == 1) {
+            viewHolder.text_task.setPaintFlags(viewHolder.text_task.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+            viewHolder.text_task.setPaintFlags(0);
+        }
     }
 
     @Override

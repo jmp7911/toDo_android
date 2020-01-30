@@ -9,8 +9,14 @@
         android:id="@+id/update"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textOn=""
-        android:textOff=""/>
+        android:textOn="돌아가기"
+        android:textOff="수정하기"/>
+    <Button
+        android:id="@+id/delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/update"
+        android:text="완료목록 삭제하기"/>
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="match_parent"

@@ -1,7 +1,13 @@
 package com.example.todo;
 
-import android.content.ClipData;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,52 +16,48 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-public class FragmentTaskList extends Fragment {
+public class FragmentUpdateTaskList extends Fragment {
 
     View view;
     RecyclerView listView;
-    ArrayList<TaskItem> item_list = new ArrayList<>();
+    ArrayList<TaskItem> list_item = new ArrayList<>();
     ItemListener itemListener = null;
+    int position;
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        itemListener = (ItemListener) context;
-        item_list = itemListener.getItemList();
-
+        if (context.getClass().getName().equals("com.example.todo.MainActivity")) {
+            itemListener = (ItemListener) context;
+            list_item = itemListener.getItemList();
+        }
     }
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_task_list, container, false);
+        view = inflater.inflate(R.layout.fragment_update_task, container, false);
+        listView = view.findViewById(R.id.update_task_item_container);
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        listView = view.findViewById(R.id.task_list_item_container);
-        TaskAdapter taskAdapter = new TaskAdapter(item_list);
+        TaskAdapterForUpdate taskAdapter = new TaskAdapterForUpdate(list_item);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         listView.setLayoutManager(layoutManager);
         listView.setAdapter(taskAdapter);
         taskAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View v, int pos) {
-
+                Intent intent = new Intent(getActivity().getApplicationContext(), UpdateTask.class);
+                intent.putExtra("position", pos);
+                startActivity(intent);
             }
         });
+
         super.onActivityCreated(savedInstanceState);
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        itemListener = null;
-    }
+
 }
