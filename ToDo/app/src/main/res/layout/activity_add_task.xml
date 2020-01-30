@@ -21,17 +21,6 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/task_place"
-        android:textSize="30sp"
-        android:textColor="@color/colorPrimary"/>
-    <EditText
-        android:id="@+id/add_text_place"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

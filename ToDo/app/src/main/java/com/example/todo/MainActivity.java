@@ -1,24 +1,27 @@
 package com.example.todo;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ToggleButton;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
     FloatingActionButton fab;
-    RecyclerView list_item;
     ArrayList<TaskItem> item_list = new ArrayList<>();
+    FragmentManager fragmentManager;
+    ToggleButton update;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,25 +34,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        item_list.add(new TaskItem("Todo", "library"));
-        item_list.add(new TaskItem("list", "library"));
-        list_item = findViewById(R.id.item_container);
-        TaskAdapter taskAdapter = new TaskAdapter(item_list);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        list_item.setLayoutManager(layoutManager);
-        list_item.setAdapter(taskAdapter);
-        taskAdapter.setOnItemClickListener(new TaskAdapter.OnItemClickListener() {
+        update = findViewById(R.id.update);
+        update.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(View v, int pos) {
-                Intent intent = new Intent(MainActivity.this, Task.class);
-                intent.putExtra("text_task", item_list.get(pos).getTask());
-                intent.putExtra("text_place", item_list.get(pos).getPlace());
-                intent.putExtra("position", pos);
-                startActivity(intent);
+            public void onClick(View view) {
+                if (update.isChecked()) {
+                    fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.container, new FragmentUpdateTask()).commit();
+                } else {
+                    fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.container, new FragmentTaskList()).commit();
+                }
             }
         });
-
-
+        fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.container, new FragmentTaskList()).commit();
 
     }
 
