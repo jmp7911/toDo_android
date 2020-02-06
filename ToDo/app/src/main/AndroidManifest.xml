@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.todo">
+    package="com.jmp.todo">
 
     <application
         android:allowBackup="true"
@@ -9,10 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".UpdateTask"></activity>
-        <activity android:name=".FragmentUpdateTaskList" />
-        <activity android:name=".AddTask" />
-        <activity android:name=".MainActivity">
+        <activity android:name="com.jmp.todo.view.TaskEditorActivity" />
+        <activity android:name="com.jmp.todo.view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
