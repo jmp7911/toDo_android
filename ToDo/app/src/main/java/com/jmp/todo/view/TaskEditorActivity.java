@@ -65,7 +65,16 @@ public class TaskEditorActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String content = contentEditText.getText().toString();
-                Task taskItem = new Task(content, 0, mYear, mMonth, mDayOfMonth);
+                Task taskItem;
+                if (task == null) {
+                    taskItem = new Task(content, 0, mYear, mMonth, mDayOfMonth);
+                } else {
+                    taskItem = task;
+                    taskItem.setContent(content);
+                    taskItem.setDueDateYear(mYear);
+                    taskItem.setDueDateMonth(mMonth);
+                    taskItem.setDueDateDayOfMonth(mDayOfMonth);
+                }
                 Intent intent1 = new Intent();
                 intent1.putExtra(MainActivity.EXTRA_TASK, taskItem);
                 int position = intent.getIntExtra(MainActivity.EXTRA_POSITION, MainActivity.NO_EXTRA_DATA);

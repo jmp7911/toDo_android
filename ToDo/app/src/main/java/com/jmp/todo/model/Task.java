@@ -17,7 +17,9 @@ public class Task implements Parcelable {
         return taskId;
     }
 
+    public Task(){
 
+    }
     public Task(String task, int isDone, int dueDateYear, int dueDateMonth, int dueDateDayOfMonth) {
         this.taskId = UUID.randomUUID().toString();
         this.content = task;
