@@ -67,7 +67,7 @@ public class TaskEditorActivity extends AppCompatActivity {
                 String content = contentEditText.getText().toString();
                 Task taskItem;
                 if (task == null) {
-                    taskItem = new Task(content, 0, mYear, mMonth, mDayOfMonth);
+                    taskItem = new Task(content, false, mYear, mMonth, mDayOfMonth);
                 } else {
                     taskItem = task;
                     taskItem.setContent(content);

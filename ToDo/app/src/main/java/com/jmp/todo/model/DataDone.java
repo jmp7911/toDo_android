@@ -14,11 +14,10 @@ public class DataDone extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... strings) {
         String taskId = strings[1];
-        int isDone = Integer.parseInt(strings[2]);
+        Boolean isDone = Boolean.parseBoolean(strings[2]);
 
         String serverURL = strings[0];
         String postParameters = "taskId=" + taskId + "&isDone=" + isDone;
-
         try {
             URL url = new URL(serverURL);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();

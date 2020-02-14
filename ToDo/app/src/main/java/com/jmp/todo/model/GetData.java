@@ -116,7 +116,7 @@ public class GetData extends AsyncTask<String, Void, String> {
 
                 String taskId = item.getString(TAG_TASKID);
                 String content = item.getString(TAG_CONTENT);
-                int isDone = item.getInt(TAG_ISDONE);
+                boolean isDone = item.getBoolean(TAG_ISDONE);
                 int dueDateYear = item.getInt(TAG_YEAR);
                 int dueDateMonth = item.getInt(TAG_MONTH);
                 int dueDateDayOfMonth = item.getInt(TAG_DAY);
@@ -129,8 +129,7 @@ public class GetData extends AsyncTask<String, Void, String> {
                 task.setDueDateMonth(dueDateMonth);
                 task.setDueDateDayOfMonth(dueDateDayOfMonth);
 
-                MainActivity.taskManager.addItem(task);
-                MainActivity.taskAdapter.notifyDataSetChanged();
+
             }
 
 

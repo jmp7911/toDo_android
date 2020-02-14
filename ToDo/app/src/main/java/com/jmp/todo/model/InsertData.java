@@ -15,12 +15,10 @@ import java.net.URL;
 
 
 public class InsertData extends AsyncTask<String, Void, String> {
-    private ProgressDialog progressDialog;
     private Context context;
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        progressDialog.dismiss();
 
     }
 
@@ -31,14 +29,13 @@ public class InsertData extends AsyncTask<String, Void, String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        progressDialog = ProgressDialog.show(context, "Please Wait", null, true, true);
     }
 
     @Override
     protected String doInBackground(String... strings) {
         String taskId = strings[1];
         String content = strings[2];
-        int isDone = Integer.parseInt(strings[3]);
+        boolean isDone = Boolean.getBoolean(strings[3]);
         int dueDateYear = Integer.parseInt(strings[4]);
         int dueDateMonth = Integer.parseInt(strings[5]);
         int dueDateDayOfMonth = Integer.parseInt(strings[6]);

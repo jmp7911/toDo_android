@@ -2,14 +2,13 @@ package com.jmp.todo.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.widget.DatePicker;
 
 import java.util.UUID;
 
 public class Task implements Parcelable {
     private String taskId;
     private String content;
-    private int isDone;
+    private boolean isDone;
     private int dueDateYear;
     private int dueDateMonth;
     private int dueDateDayOfMonth;
@@ -20,7 +19,7 @@ public class Task implements Parcelable {
     public Task(){
 
     }
-    public Task(String task, int isDone, int dueDateYear, int dueDateMonth, int dueDateDayOfMonth) {
+    public Task(String task, boolean isDone, int dueDateYear, int dueDateMonth, int dueDateDayOfMonth) {
         this.taskId = UUID.randomUUID().toString();
         this.content = task;
         this.isDone = isDone;
@@ -61,11 +60,11 @@ public class Task implements Parcelable {
         return dueDateYear;
     }
 
-    public void setIsDone(int isDone) {
+    public void setIsDone(boolean isDone) {
         this.isDone = isDone;
     }
 
-    public int getIsDone() {
+    public boolean isDone() {
         return isDone;
     }
 
@@ -76,7 +75,7 @@ public class Task implements Parcelable {
     protected Task(Parcel in) {
         taskId = in.readString();
         content = in.readString();
-        isDone = in.readInt();
+        isDone = in.readInt() == 1;
         dueDateYear = in.readInt();
         dueDateMonth = in.readInt();
         dueDateDayOfMonth = in.readInt();
@@ -103,7 +102,7 @@ public class Task implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(taskId);
         parcel.writeString(content);
-        parcel.writeInt(isDone);
+        parcel.writeInt(isDone ? 1 : 0);
         parcel.writeInt(dueDateYear);
         parcel.writeInt(dueDateMonth);
         parcel.writeInt(dueDateDayOfMonth);
