@@ -3,15 +3,16 @@ package com.jmp.todo.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 public class Task implements Parcelable {
     private String taskId;
     private String content;
     private boolean isDone;
-    private int dueDateYear;
-    private int dueDateMonth;
-    private int dueDateDayOfMonth;
+    private Timestamp dueDate;
+    private String imageContent;
+
     public String getTaskId() {
         return taskId;
     }
@@ -19,13 +20,20 @@ public class Task implements Parcelable {
     public Task(){
 
     }
-    public Task(String task, boolean isDone, int dueDateYear, int dueDateMonth, int dueDateDayOfMonth) {
+    public Task(String task, boolean isDone, Timestamp dueDate, String imageContent) {
         this.taskId = UUID.randomUUID().toString();
         this.content = task;
         this.isDone = isDone;
-        this.dueDateYear = dueDateYear;
-        this.dueDateMonth = dueDateMonth;
-        this.dueDateDayOfMonth = dueDateDayOfMonth;
+        this.dueDate = dueDate;
+        this.imageContent = imageContent;
+    }
+
+    public void setDueDate(Timestamp dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public Timestamp getDueDate() {
+        return dueDate;
     }
 
     public void setContent(String content) {
@@ -34,30 +42,6 @@ public class Task implements Parcelable {
 
     public String getContent() {
         return content;
-    }
-
-    public void setDueDateDayOfMonth(int dueDateDayOfMonth) {
-        this.dueDateDayOfMonth = dueDateDayOfMonth;
-    }
-
-    public void setDueDateMonth(int dueDateMonth) {
-        this.dueDateMonth = dueDateMonth;
-    }
-
-    public void setDueDateYear(int dueDateYear) {
-        this.dueDateYear = dueDateYear;
-    }
-
-    public int getDueDateDayOfMonth() {
-        return dueDateDayOfMonth;
-    }
-
-    public int getDueDateMonth() {
-        return dueDateMonth;
-    }
-
-    public int getDueDateYear() {
-        return dueDateYear;
     }
 
     public void setIsDone(boolean isDone) {
@@ -72,13 +56,20 @@ public class Task implements Parcelable {
         this.taskId = taskId;
     }
 
+    public String getImageContent() {
+        return imageContent;
+    }
+
+    public void setImageContent(String imageContent) {
+        this.imageContent = imageContent;
+    }
+
     protected Task(Parcel in) {
         taskId = in.readString();
         content = in.readString();
         isDone = in.readInt() == 1;
-        dueDateYear = in.readInt();
-        dueDateMonth = in.readInt();
-        dueDateDayOfMonth = in.readInt();
+        dueDate = new Timestamp(in.readLong());
+        imageContent = in.readString();
     }
 
     public static final Creator<Task> CREATOR = new Creator<Task>() {
@@ -103,8 +94,7 @@ public class Task implements Parcelable {
         parcel.writeString(taskId);
         parcel.writeString(content);
         parcel.writeInt(isDone ? 1 : 0);
-        parcel.writeInt(dueDateYear);
-        parcel.writeInt(dueDateMonth);
-        parcel.writeInt(dueDateDayOfMonth);
+        parcel.writeLong(dueDate.getTime());
+        parcel.writeString(imageContent);
     }
 }

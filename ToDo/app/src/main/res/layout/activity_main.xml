@@ -5,25 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.MainActivity">
-    <Button
-        android:id="@+id/write"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/delete_item"
-        android:text="write"
-        />
-    <Button
-        android:id="@+id/read"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/write"
-        android:text="read"/>
-    <ImageView
-        android:id="@+id/image_test"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_toEndOf="@id/read"
-        />
+
     <Button
         android:id="@+id/delete_item"
         android:layout_width="wrap_content"

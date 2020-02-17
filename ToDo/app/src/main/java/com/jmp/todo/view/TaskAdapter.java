@@ -1,69 +1,66 @@
 package com.jmp.todo.view;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jmp.todo.R;
-import com.jmp.todo.iface.OnCheckListener;
+import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnItemClickListener;
-import com.jmp.todo.model.DataDone;
+import com.jmp.todo.model.ImageFileManager;
 import com.jmp.todo.model.Task;
 
-import java.util.Calendar;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
+    private ArrayList<Task> tasks;
     private OnItemClickListener itemClickListener = null;
-    private OnCheckListener checkListener = null;
-
+    private OnCheckDoneListener checkDoneListener = null;
+    private Context context;
     final long ONE_DAY = 1000 * 3600 * 24;
 
     void setOnItemClickListener(OnItemClickListener listener) {
         this.itemClickListener = listener;
     }
-    void setOnCheckListener(OnCheckListener listener) {
-        this.checkListener = listener;
+    void setOnCheckListener(OnCheckDoneListener listener) {
+        this.checkDoneListener = listener;
     }
-
+    TaskAdapter(Context context, ArrayList<Task> tasks) {
+        this.context = context;
+        this.tasks = tasks;
+    }
     class ViewHolder extends RecyclerView.ViewHolder {
         private TextView contentView;
         private TextView dueDateView;
         private CheckBox isDoneCkbox;
-        private ImageView itemImage;
-        public ViewHolder(@NonNull View itemView) {
+        private ImageView taskImage;
+
+        private ViewHolder(@NonNull View itemView) {
             super(itemView);
             contentView = itemView.findViewById(R.id.item_content);
-            dueDateView = itemView.findViewById(R.id.item_dueDate);
-            itemImage = itemView.findViewById(R.id.item_image);
-
+            dueDateView = itemView.findViewById(R.id.item_due_date);
+            taskImage = itemView.findViewById(R.id.task_image);
             isDoneCkbox = itemView.findViewById(R.id.ckbox);
-            isDoneCkbox.setOnClickListener(new View.OnClickListener() {
+
+            isDoneCkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
-                public void onClick(View view) {
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
-                        if (isDoneCkbox.isChecked()) {
-                            Task item = MainActivity.taskManager.getItem(pos);
-                            item.setIsDone(true);
-                            checkListener.onCheckDone(item.isDone(), item.getTaskId());
-                            DataDone dataDone = new DataDone();
-                            dataDone.execute("http://" + MainActivity.IP_ADDRESS + "/dataDone.php", item.getTaskId()
-                                    , Boolean.toString(item.isDone()));
-                        } else {
-                            Task item = MainActivity.taskManager.getItem(pos);
-                            item.setIsDone(false);
-                            checkListener.onCheckDone(item.isDone(), item.getTaskId());
-                            DataDone dataDone = new DataDone();
-                            dataDone.execute("http://" + MainActivity.IP_ADDRESS + "/dataDone.php", item.getTaskId()
-                                    , Boolean.toString(item.isDone()));
-                        }
+                        Task task = tasks.get(pos);
+                        task.setIsDone(b);
+                        checkDoneListener.onCheckDone(task.isDone(), task.getTaskId());
                     }
                 }
             });
@@ -72,25 +69,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                 public void onClick(View view) {
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
-                        if (isDoneCkbox.isChecked()) {
-                            Task item = MainActivity.taskManager.getItem(pos);
-                            item.setIsDone(false);
-                            checkListener.onCheckDone(item.isDone(), item.getTaskId());
-                            DataDone dataDone = new DataDone();
-                            dataDone.execute("http://" + MainActivity.IP_ADDRESS + "/dataDone.php", item.getTaskId()
-                                    , Boolean.toString(item.isDone()));
-                            isDoneCkbox.setChecked(false);
-                        } else {
-                            Task item = MainActivity.taskManager.getItem(pos);
-                            item.setIsDone(true);
-                            checkListener.onCheckDone(item.isDone(), item.getTaskId());
-                            DataDone dataDone = new DataDone();
-                            dataDone.execute("http://" + MainActivity.IP_ADDRESS + "/dataDone.php", item.getTaskId()
-                                    , Boolean.toString(item.isDone()));
-                            isDoneCkbox.setChecked(true);
-                        }
+                        Task task = tasks.get(pos);
+                        task.setIsDone(isDoneCkbox.isChecked());
+                        isDoneCkbox.setChecked(!isDoneCkbox.isChecked());
                     }
-
                 }
             });
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -116,41 +98,42 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int position) {
-        Task item = MainActivity.taskManager.getItemList().get(position);
-        long today = Calendar.getInstance().getTimeInMillis() / ONE_DAY;
-        int mYear = item.getDueDateYear();
-        int mMonth = item.getDueDateMonth();
-        int mDayOfMonth = item.getDueDateDayOfMonth();
-        Calendar dDayCal = Calendar.getInstance();
-        dDayCal.set(mYear, mMonth, mDayOfMonth);
-        long dDay = dDayCal.getTimeInMillis() / ONE_DAY;
-        long result = dDay - today;
-        String strFormat;
-        if (result > 0) {
-            strFormat = "D-%d";
-        } else if (result == 0) {
-            strFormat = "D-day";
-        } else {
-            result *= -1;
-            strFormat = "D+%d";
-        }
-        String strCount = String.format(strFormat, result);
-        viewHolder.dueDateView.setText(strCount);
-        String content = item.getContent();
+        Task task = tasks.get(position);
+        viewHolder.dueDateView.setText(getDday(task));
+        String content = task.getContent();
         viewHolder.contentView.setText(content);
-
-        if (item.isDone()) {
+        if (task.isDone()) {
             viewHolder.isDoneCkbox.setChecked(true);
         } else {
             viewHolder.isDoneCkbox.setChecked(false);
         }
-
-
+        ImageFileManager fileManager = new ImageFileManager(context);
+        String imageContent = fileManager.getPath(task);
+        if (!imageContent.equals("null")) {
+            viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(imageContent));
+        }
     }
-
+    String getDday(Task task) {
+        Timestamp today = new Timestamp(System.currentTimeMillis());
+        Timestamp dueDate = task.getDueDate();
+        long result = dueDate.getTime() - today.getTime();
+        String strFormat;
+        if (result > ONE_DAY) {
+            strFormat = "D-%d";
+            result = dueDate.getTime() - today.getTime() / ONE_DAY;
+        } else if (result >= 0) {
+            strFormat = "D-%d";
+            result = result / ONE_DAY + 1;
+        } else if (result > -ONE_DAY) {
+            strFormat = "D-day";
+        } else {
+            result = (result * -1) / ONE_DAY;
+            strFormat = "D+%d";
+        }
+        return String.format(strFormat, result );
+    }
     @Override
     public int getItemCount() {
-        return MainActivity.taskManager.getItemList().size();
-
+        return tasks.size();
     }
 }

@@ -17,9 +17,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 "taskId, " +
                 "content, " +
                 "isDone, " +
-                "dueDateYear, " +
-                "dueDateMonth, " +
-                "dueDateDayOfMonth)";
+                "dueDate, " +
+                "imageContent)";
         sqLiteDatabase.execSQL(taskSQL);
     }
     @Override
