@@ -1,5 +1,7 @@
 package com.jmp.todo.iface;
 
+import com.jmp.todo.model.Task;
+
 public interface OnCheckDoneListener {
-    void onCheckDone(Boolean isDone, String taskId);
+    void onCheckDone(Task task);
 }

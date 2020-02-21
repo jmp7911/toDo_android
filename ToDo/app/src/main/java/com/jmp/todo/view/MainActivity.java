@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -15,7 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnItemClickListener;
-import com.jmp.todo.model.DbManager;
+import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.model.ImageFileManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
@@ -27,10 +28,10 @@ public class MainActivity extends AppCompatActivity {
     private TaskManager taskManager;
     private TaskAdapter taskAdapter;
     private ImageFileManager fileManager;
-    public DbManager dbManager;
+    private RecyclerView recyclerView;
     final int REQUEST_CODE_UPDATE = 1001;
     final int REQUEST_CODE_ADD = 1002;
-    public static final String EXTRA_TASK = "taskItem";
+    public static final String EXTRA_TASK = "task";
     public static final String EXTRA_POSITION = "position";
     public static final int NO_EXTRA_DATA = -1;
     @Override
@@ -40,55 +41,59 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
                 Task task = data.getParcelableExtra(EXTRA_TASK);
+                String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
+                task.setImageContent(imageContent);
                 taskManager.setTask(task, position);
                 taskAdapter.notifyItemChanged(position);
-                dbManager.updateTask(task);
-                fileManager.writeToInternalStorage(task);
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_CODE_ADD) {
             if (resultCode == RESULT_OK) {
                 Task task = data.getParcelableExtra(EXTRA_TASK);
+                String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
+                task.setImageContent(imageContent);
+
                 taskManager.addTask(task);
                 taskAdapter.notifyItemInserted(taskManager.getTasks().size());
-                dbManager.insertTask(task);
-                fileManager.writeToInternalStorage(task);
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }
         }
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         fileManager = new ImageFileManager(getApplicationContext());
-        dbManager = new DbManager(getApplicationContext());
-        ArrayList<Task> tasks = dbManager.selectTasks();
-        taskManager = new TaskManager(tasks);
-        taskAdapter = new TaskAdapter(getApplicationContext(), tasks);
-        RecyclerView recyclerView = findViewById(R.id.container);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(taskAdapter);
-        taskAdapter.setOnItemClickListener(new OnItemClickListener() {
+        recyclerView = findViewById(R.id.container);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        taskManager = new TaskManager(getApplicationContext());
+        OnSetTasksListener onSetTasksListener = new OnSetTasksListener() {
             @Override
-            public void onItemClick(View v, int pos) {
-                Task task = taskManager.getTask(pos);
-                Intent intent = new Intent(getApplicationContext(), TaskEditorActivity.class);
-                intent.putExtra(EXTRA_TASK, task);
-                intent.putExtra(EXTRA_POSITION, pos);
-                startActivityForResult(intent, REQUEST_CODE_UPDATE);
+            public void onSetTasks(ArrayList<Task> tasks) {
+                taskAdapter = new TaskAdapter(getApplicationContext(), tasks);
+                recyclerView.setAdapter(taskAdapter);
+                taskAdapter.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View v, int pos) {
+                        Task task = taskManager.getTask(pos);
+                        Intent intent = new Intent(getApplicationContext(), TaskEditorActivity.class);
+                        intent.putExtra(EXTRA_TASK, task);
+                        intent.putExtra(EXTRA_POSITION, pos);
+                        startActivityForResult(intent, REQUEST_CODE_UPDATE);
+                    }
+                });
+                taskAdapter.setOnCheckListener(new OnCheckDoneListener() {
+                    @Override
+                    public void onCheckDone(Task task) {
+                        taskManager.updateDoneTask(task);
+                    }
+                });
             }
-        });
-        taskAdapter.setOnCheckListener(new OnCheckDoneListener() {
-            @Override
-            public void onCheckDone(Boolean isDone, String taskId) {
-                dbManager.updateDone(isDone, taskId);
-            }
-        });
+        };
+        taskManager.getTasksFromServer(onSetTasksListener);//----------------------------get tasks from server
+//        taskManager.getTasksFromDB(onSetTasksListener);//---------------------- get tasks from SQLiteDatabase
         FloatingActionButton fab = findViewById(R.id.fab_add);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,18 +106,10 @@ public class MainActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dbManager.deleteTask(taskManager.getTasks());
-                int i = taskManager.getTasks().size();
-                while (i-- > 0) {
-                    if (taskManager.getTask(i).isDone()) {
-                        fileManager.deleteImage(taskManager.getTask(i));
-                        taskManager.deleteTask(i);
-                        taskAdapter.notifyItemRemoved(i);
-                    }
-                }
+                fileManager.deleteDoneImage(taskManager.getTasks());
+                taskManager.deleteDoneTask();
+                taskAdapter.notifyDataSetChanged();
             }
         });
     }
-
-
 }
