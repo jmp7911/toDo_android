@@ -15,6 +15,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnItemClickListener;
+import com.jmp.todo.model.DbManager;
 import com.jmp.todo.model.ImageFileManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private TaskManager taskManager;
     private TaskAdapter taskAdapter;
     private ImageFileManager fileManager;
+    public DbManager dbManager;
     final int REQUEST_CODE_UPDATE = 1001;
     final int REQUEST_CODE_ADD = 1002;
     public static final String EXTRA_TASK = "taskItem";
@@ -38,20 +40,20 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
                 Task task = data.getParcelableExtra(EXTRA_TASK);
-                String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
-                task.setImageContent(imageContent);
                 taskManager.setTask(task, position);
                 taskAdapter.notifyItemChanged(position);
+                dbManager.updateTask(task);
+                fileManager.writeToInternalStorage(task);
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_CODE_ADD) {
             if (resultCode == RESULT_OK) {
                 Task task = data.getParcelableExtra(EXTRA_TASK);
-                String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
-                task.setImageContent(imageContent);
                 taskManager.addTask(task);
                 taskAdapter.notifyItemInserted(taskManager.getTasks().size());
+                dbManager.insertTask(task);
+                fileManager.writeToInternalStorage(task);
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }
@@ -63,9 +65,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         fileManager = new ImageFileManager(getApplicationContext());
-        taskManager = new TaskManager(this);
-        taskManager.getTasksFromDB();
-        taskAdapter = new TaskAdapter(getApplicationContext(), taskManager.getTasks());
+        dbManager = new DbManager(getApplicationContext());
+        ArrayList<Task> tasks = dbManager.selectTasks();
+        taskManager = new TaskManager(tasks);
+        taskAdapter = new TaskAdapter(getApplicationContext(), tasks);
         RecyclerView recyclerView = findViewById(R.id.container);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
@@ -82,8 +85,8 @@ public class MainActivity extends AppCompatActivity {
         });
         taskAdapter.setOnCheckListener(new OnCheckDoneListener() {
             @Override
-            public void onCheckDone(Task task) {
-                taskManager.updateDoneTask(task);
+            public void onCheckDone(Boolean isDone, String taskId) {
+                dbManager.updateDone(isDone, taskId);
             }
         });
         FloatingActionButton fab = findViewById(R.id.fab_add);
@@ -98,9 +101,15 @@ public class MainActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                fileManager.deleteDoneImage(taskManager.getTasks());
-                taskManager.deleteDoneTask();
-                taskAdapter.notifyDataSetChanged();
+                dbManager.deleteTask(taskManager.getTasks());
+                int i = taskManager.getTasks().size();
+                while (i-- > 0) {
+                    if (taskManager.getTask(i).isDone()) {
+                        fileManager.deleteImage(taskManager.getTask(i));
+                        taskManager.deleteTask(i);
+                        taskAdapter.notifyItemRemoved(i);
+                    }
+                }
             }
         });
     }
