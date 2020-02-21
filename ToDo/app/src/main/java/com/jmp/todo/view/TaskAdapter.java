@@ -60,7 +60,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                     if (pos != RecyclerView.NO_POSITION) {
                         Task task = tasks.get(pos);
                         task.setIsDone(b);
-                        checkDoneListener.onCheckDone(task.isDone(), task.getTaskId());
+                        checkDoneListener.onCheckDone(task);
                     }
                 }
             });
@@ -108,19 +108,19 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             viewHolder.isDoneCkbox.setChecked(false);
         }
         ImageFileManager fileManager = new ImageFileManager(context);
-        String imageContent = fileManager.getPath(task);
+        String imageContent = fileManager.getPath(task.getImageContent());
         if (!imageContent.equals("null")) {
             viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(imageContent));
         }
     }
     String getDday(Task task) {
-        Timestamp today = new Timestamp(System.currentTimeMillis());
-        Timestamp dueDate = task.getDueDate();
-        long result = dueDate.getTime() - today.getTime();
+        long today = System.currentTimeMillis();
+        long dueDate = task.getDueDate();
+        long result = dueDate - today;
         String strFormat;
         if (result > ONE_DAY) {
             strFormat = "D-%d";
-            result = dueDate.getTime() - today.getTime() / ONE_DAY;
+            result = dueDate - today / ONE_DAY;
         } else if (result >= 0) {
             strFormat = "D-%d";
             result = result / ONE_DAY + 1;
