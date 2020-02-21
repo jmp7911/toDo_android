@@ -22,12 +22,16 @@ public class TaskManager {
         this.tasks = new ArrayList<>();
     }
     public Task getTask(int pos) {
-       if (tasks.size() <= pos) return null;
+       if (tasks.size() <= pos) {
+           return null;
+       }
        return tasks.get(pos);
 
     }
     public void setTask(Task task, int pos) {
-        if (tasks.size() <= pos) return;
+        if (tasks.size() <= pos) {
+            return;
+        }
         tasks.set(pos, task);
         dbManager.updateTask(task);
     }
