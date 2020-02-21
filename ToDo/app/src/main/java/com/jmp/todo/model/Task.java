@@ -3,28 +3,24 @@ package com.jmp.todo.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 public class Task implements Parcelable {
     private String taskId;
     private String content;
     private boolean isDone;
-    private long dueDate;
+    private Timestamp dueDate;
     private String imageContent;
 
     public String getTaskId() {
         return taskId;
     }
 
-    public Task() {
-        this.taskId = UUID.randomUUID().toString().replace("-","");
-        this.content = "";
-        this.isDone = false;
-        this.dueDate = System.currentTimeMillis();
-        this.imageContent = "null";
-    }
+    public Task(){
 
-    public Task(String task, boolean isDone, long dueDate, String imageContent) {
+    }
+    public Task(String task, boolean isDone, Timestamp dueDate, String imageContent) {
         this.taskId = UUID.randomUUID().toString();
         this.content = task;
         this.isDone = isDone;
@@ -32,11 +28,11 @@ public class Task implements Parcelable {
         this.imageContent = imageContent;
     }
 
-    public void setDueDate(long dueDate) {
+    public void setDueDate(Timestamp dueDate) {
         this.dueDate = dueDate;
     }
 
-    public long getDueDate() {
+    public Timestamp getDueDate() {
         return dueDate;
     }
 
@@ -72,7 +68,7 @@ public class Task implements Parcelable {
         taskId = in.readString();
         content = in.readString();
         isDone = in.readInt() == 1;
-        dueDate = in.readLong();
+        dueDate = new Timestamp(in.readLong());
         imageContent = in.readString();
     }
 
@@ -98,7 +94,7 @@ public class Task implements Parcelable {
         parcel.writeString(taskId);
         parcel.writeString(content);
         parcel.writeInt(isDone ? 1 : 0);
-        parcel.writeLong(dueDate);
+        parcel.writeLong(dueDate.getTime());
         parcel.writeString(imageContent);
     }
 }
