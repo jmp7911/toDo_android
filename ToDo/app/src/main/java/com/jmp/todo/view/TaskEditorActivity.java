@@ -31,7 +31,7 @@ import java.util.Calendar;
 public class TaskEditorActivity extends AppCompatActivity {
     private EditText contentEditText;
     private TextView dueDateTextView;
-    private Timestamp dueDate = new Timestamp(System.currentTimeMillis());
+    private long dueDate = System.currentTimeMillis();
     final int TASK_IMAGE = 1003;
     private ImageView taskImage;
     private String imageContent = "null";
@@ -74,7 +74,7 @@ public class TaskEditorActivity extends AppCompatActivity {
                         dueDateTextView.setText(new StringBuilder().append(year).append("-").append(month + 1).append("-")
                                 .append(dayOfMonth));
                         calendar.set(year,month,dayOfMonth);
-                        dueDate = new Timestamp(calendar.getTimeInMillis());
+                        dueDate = calendar.getTimeInMillis();
                     }
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 datePickerDialog.show();
@@ -97,7 +97,7 @@ public class TaskEditorActivity extends AppCompatActivity {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             dueDateTextView.setText(simpleDateFormat.format(task.getDueDate()));
             ImageFileManager fileManager = new ImageFileManager(getApplicationContext());
-            taskImage.setImageDrawable(Drawable.createFromPath(fileManager.getPath(task)));
+            taskImage.setImageDrawable(Drawable.createFromPath(fileManager.getPath(task.getImageContent())));
         }
         Button submitButton = findViewById(R.id.edit_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
