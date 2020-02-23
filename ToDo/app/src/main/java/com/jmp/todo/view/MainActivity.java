@@ -16,6 +16,7 @@ import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnItemClickListener;
 import com.jmp.todo.iface.OnSetTasksListener;
+import com.jmp.todo.iface.OnTaskChangedListener;
 import com.jmp.todo.model.ImageFileManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
@@ -52,8 +53,12 @@ public class MainActivity extends AppCompatActivity {
                 Task task = data.getParcelableExtra(EXTRA_TASK);
                 String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                 task.setImageContent(imageContent);
-                taskManager.addTask(task);
-                taskAdapter.notifyItemInserted(taskManager.getTasks().size());
+                taskManager.addTask(task, new OnTaskChangedListener() {
+                    @Override
+                    public void onPostTask() {
+                        taskAdapter.notifyItemInserted(taskManager.getTasks().size());
+                    }
+                });
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }

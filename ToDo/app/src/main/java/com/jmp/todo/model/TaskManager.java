@@ -3,6 +3,7 @@ package com.jmp.todo.model;
 import android.content.Context;
 
 import com.jmp.todo.iface.OnSetTasksListener;
+import com.jmp.todo.iface.OnTaskChangedListener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ public class TaskManager {
     private DbManager dbManager;
     private ArrayList<Task> tasks;
     public static final String GET_URL = "http://todo-android-study.herokuapp.com/tasks";
+    public static final String POST_URL = "http://todo-android-study.herokuapp.com/task/";
     public TaskManager(Context context) {
         this.context = context;
         this.dbManager = new DbManager(context);
@@ -33,9 +35,13 @@ public class TaskManager {
         tasks.set(pos, task);
         dbManager.updateTask(task);
     }
-    public void addTask(Task task) {
+    public void addTask(Task task, OnTaskChangedListener listener) {
         tasks.add(task);
         dbManager.insertTask(task);
+        ServerManager serverManager = new ServerManager(context, listener);
+        serverManager.execute(POST_URL, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
+                , Long.toString(task.getDueDate()));
+
     }
     public void updateDoneTask(Task task) {
         dbManager.updateDoneTask(task);
