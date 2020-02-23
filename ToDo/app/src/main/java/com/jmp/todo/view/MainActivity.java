@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
+import com.jmp.todo.iface.OnDeleteTaskListener;
 import com.jmp.todo.iface.OnItemClickListener;
 import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
@@ -119,7 +120,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 fileManager.deleteDoneImage(taskManager.getTasks());
-                taskManager.deleteDoneTask();
+                taskManager.deleteDoneTask(new OnDeleteTaskListener() {
+                    @Override
+                    public void onDeleteTask() {
+                        taskAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
 

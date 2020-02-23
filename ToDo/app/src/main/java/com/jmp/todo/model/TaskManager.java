@@ -2,6 +2,7 @@ package com.jmp.todo.model;
 
 import android.content.Context;
 
+import com.jmp.todo.iface.OnDeleteTaskListener;
 import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.iface.OnPostTaskListener;
@@ -9,6 +10,7 @@ import com.jmp.todo.iface.OnPostTaskListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import static com.jmp.todo.model.ServerManager.DELETE;
 import static com.jmp.todo.model.ServerManager.GET;
 import static com.jmp.todo.model.ServerManager.POST;
 import static com.jmp.todo.model.ServerManager.PUT;
@@ -56,8 +58,14 @@ public class TaskManager {
     public void updateDoneTask(Task task) {
         dbManager.updateDoneTask(task);
     }
-    public void deleteDoneTask() {
+    public void deleteDoneTask(OnDeleteTaskListener listener) {
         dbManager.deleteDoneTask(tasks);
+        for (Task task : tasks) {
+            if (task.isDone()) {
+                ServerManager serverManager = new ServerManager(context, listener);
+                serverManager.execute(DELETE, task.getTaskId());
+            }
+        }
         for (Iterator<Task> task = tasks.iterator(); task.hasNext();) {
             if (task.next().isDone()) {
                 task.remove();

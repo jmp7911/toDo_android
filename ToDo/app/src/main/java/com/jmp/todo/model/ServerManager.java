@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import com.jmp.todo.iface.OnDeleteTaskListener;
 import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.iface.OnPostTaskListener;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.jmp.todo.model.TaskManager.DELETE_URL;
 import static com.jmp.todo.model.TaskManager.GET_URL;
 import static com.jmp.todo.model.TaskManager.POST_URL;
 import static com.jmp.todo.model.TaskManager.PUT_URL;
@@ -37,6 +39,7 @@ public class ServerManager extends AsyncTask<String, String, String> {
     private OnSetTasksListener onSetTasksListener;
     private OnPostTaskListener onPostTaskListener;
     private OnPutTaskListener onPutTaskListener;
+    private OnDeleteTaskListener onDeleteTaskListener;
     public final String TASK_ID = "id";
     public final String CONTENT = "content";
     public final String IS_DONE = "is_done";
@@ -74,6 +77,14 @@ public class ServerManager extends AsyncTask<String, String, String> {
         this.onPutTaskListener = onPutTaskListener;
     }
 
+    public ServerManager(Context context, OnDeleteTaskListener onDeleteTaskListener) {
+        this.context = context;
+        this.requestURL = "";
+        this.requestMethod = "";
+        this.mJsonString = "";
+        this.tasks = new ArrayList<>();
+        this.onDeleteTaskListener = onDeleteTaskListener;
+    }
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
@@ -89,6 +100,8 @@ public class ServerManager extends AsyncTask<String, String, String> {
                 onPostTaskListener.onPostTask();
             } else if (requestMethod.equals(PUT)) {
                 onPutTaskListener.onPutTask();
+            } else if (requestMethod.equals(DELETE)) {
+                onDeleteTaskListener.onDeleteTask();
             }
         }
     }
@@ -109,9 +122,14 @@ public class ServerManager extends AsyncTask<String, String, String> {
                 requestURL = PUT_URL + strings[1];
                 requestMethod = PUT;
                 break;
-
+            case DELETE:
+                requestURL = DELETE_URL + strings[1];
+                requestMethod = DELETE;
+                break;
         }
-        if (requestMethod.equals(POST) || requestMethod.equals(PUT)) {
+        if (requestMethod.equals(DELETE)) {
+            task.put(TASK_ID, strings[1]);
+        } else if (requestMethod.equals(POST) || requestMethod.equals(PUT)) {
             task.put(TASK_ID, strings[1]);
             task.put(CONTENT, strings[2]);
             task.put(IS_DONE, Boolean.parseBoolean(strings[3]));
