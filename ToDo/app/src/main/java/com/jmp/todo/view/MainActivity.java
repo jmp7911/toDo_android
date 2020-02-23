@@ -15,6 +15,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnItemClickListener;
+import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.model.ImageFileManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
     private TaskManager taskManager;
     private TaskAdapter taskAdapter;
     private ImageFileManager fileManager;
@@ -64,28 +66,35 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         fileManager = new ImageFileManager(getApplicationContext());
         taskManager = new TaskManager(this);
-        taskManager.getTasksFromDB();
-        taskAdapter = new TaskAdapter(getApplicationContext(), taskManager.getTasks());
-        RecyclerView recyclerView = findViewById(R.id.container);
+        recyclerView = findViewById(R.id.container);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(taskAdapter);
-        taskAdapter.setOnItemClickListener(new OnItemClickListener() {
+        //taskManager.getTasksFromDB();
+        taskManager.getTasksFromServer(this, new OnSetTasksListener() {
             @Override
-            public void onItemClick(View v, int pos) {
-                Task task = taskManager.getTask(pos);
-                Intent intent = new Intent(getApplicationContext(), TaskEditorActivity.class);
-                intent.putExtra(EXTRA_TASK, task);
-                intent.putExtra(EXTRA_POSITION, pos);
-                startActivityForResult(intent, REQUEST_CODE_UPDATE);
+            public void onSetTasks(ArrayList<Task> tasks) {
+                taskManager.setTasks(tasks);
+                taskAdapter = new TaskAdapter(getApplicationContext(), taskManager.getTasks());
+                taskAdapter.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View v, int pos) {
+                        Task task = taskManager.getTask(pos);
+                        Intent intent = new Intent(getApplicationContext(), TaskEditorActivity.class);
+                        intent.putExtra(EXTRA_TASK, task);
+                        intent.putExtra(EXTRA_POSITION, pos);
+                        startActivityForResult(intent, REQUEST_CODE_UPDATE);
+                    }
+                });
+                taskAdapter.setOnCheckListener(new OnCheckDoneListener() {
+                    @Override
+                    public void onCheckDone(Task task) {
+                        taskManager.updateDoneTask(task);
+                    }
+                });
+                recyclerView.setAdapter(taskAdapter);
             }
         });
-        taskAdapter.setOnCheckListener(new OnCheckDoneListener() {
-            @Override
-            public void onCheckDone(Task task) {
-                taskManager.updateDoneTask(task);
-            }
-        });
+
         FloatingActionButton fab = findViewById(R.id.fab_add);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
