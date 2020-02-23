@@ -16,7 +16,6 @@ import com.jmp.todo.iface.OnItemClickListener;
 import com.jmp.todo.model.ImageFileManager;
 import com.jmp.todo.model.Task;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
@@ -108,7 +107,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             viewHolder.isDoneCkbox.setChecked(false);
         }
         ImageFileManager fileManager = new ImageFileManager(context);
-        String imageContent = fileManager.getPath(task.getImageContent());
+        String imageContent = fileManager.getPathFromInternalStorage(task.getImageContent());
         if (!imageContent.equals("null")) {
             viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(imageContent));
         }
@@ -118,12 +117,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         long dueDate = task.getDueDate();
         long result = dueDate - today;
         String strFormat;
-        if (result > ONE_DAY) {
+        if (result >= 0) {
             strFormat = "D-%d";
-            result = dueDate - today / ONE_DAY;
-        } else if (result >= 0) {
-            strFormat = "D-%d";
-            result = result / ONE_DAY + 1;
+            result = (dueDate - today) / ONE_DAY + 1;
         } else if (result > -ONE_DAY) {
             strFormat = "D-day";
         } else {

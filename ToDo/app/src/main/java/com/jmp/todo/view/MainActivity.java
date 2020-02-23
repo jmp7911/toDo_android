@@ -15,8 +15,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnItemClickListener;
+import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
-import com.jmp.todo.iface.OnTaskChangedListener;
+import com.jmp.todo.iface.OnPostTaskListener;
 import com.jmp.todo.model.ImageFileManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
@@ -39,11 +40,16 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_UPDATE) {
             if (resultCode == RESULT_OK) {
-                int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
+                final int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
                 Task task = data.getParcelableExtra(EXTRA_TASK);
                 String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                 task.setImageContent(imageContent);
-                taskManager.setTask(task, position);
+                taskManager.setTask(task, position, new OnPutTaskListener() {
+                    @Override
+                    public void onPutTask() {
+                        taskAdapter.notifyItemChanged(position);
+                    }
+                });
                 taskAdapter.notifyItemChanged(position);
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
@@ -53,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 Task task = data.getParcelableExtra(EXTRA_TASK);
                 String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                 task.setImageContent(imageContent);
-                taskManager.addTask(task, new OnTaskChangedListener() {
+                taskManager.addTask(task, new OnPostTaskListener() {
                     @Override
                     public void onPostTask() {
                         taskAdapter.notifyItemInserted(taskManager.getTasks().size());
@@ -114,9 +120,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 fileManager.deleteDoneImage(taskManager.getTasks());
                 taskManager.deleteDoneTask();
-                taskAdapter.notifyDataSetChanged();
             }
         });
+
     }
 
 

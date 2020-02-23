@@ -1,6 +1,6 @@
 package com.jmp.todo.iface;
 
 
-public interface OnTaskChangedListener {
+public interface OnPostTaskListener {
     void onPostTask();
 }

@@ -23,7 +23,6 @@ import com.jmp.todo.model.Task;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -52,11 +51,9 @@ public class TaskEditorActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,8 +93,9 @@ public class TaskEditorActivity extends AppCompatActivity {
             contentEditText.setText(task.getContent());
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             dueDateTextView.setText(simpleDateFormat.format(task.getDueDate()));
+            dueDate = task.getDueDate();
             ImageFileManager fileManager = new ImageFileManager(getApplicationContext());
-            taskImage.setImageDrawable(Drawable.createFromPath(fileManager.getPath(task.getImageContent())));
+            taskImage.setImageDrawable(Drawable.createFromPath(fileManager.getPathFromInternalStorage(task.getImageContent())));
         }
         Button submitButton = findViewById(R.id.edit_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {

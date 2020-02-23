@@ -2,11 +2,11 @@ package com.jmp.todo.model;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
+import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
-import com.jmp.todo.iface.OnTaskChangedListener;
+import com.jmp.todo.iface.OnPostTaskListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,7 +16,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +25,7 @@ import java.util.Map;
 
 import static com.jmp.todo.model.TaskManager.GET_URL;
 import static com.jmp.todo.model.TaskManager.POST_URL;
+import static com.jmp.todo.model.TaskManager.PUT_URL;
 
 
 public class ServerManager extends AsyncTask<String, String, String> {
@@ -35,21 +35,25 @@ public class ServerManager extends AsyncTask<String, String, String> {
     private String mJsonString;
     private ArrayList<Task> tasks;
     private OnSetTasksListener onSetTasksListener;
-    private OnTaskChangedListener onTaskChangedListener;
+    private OnPostTaskListener onPostTaskListener;
+    private OnPutTaskListener onPutTaskListener;
     public final String TASK_ID = "id";
     public final String CONTENT = "content";
     public final String IS_DONE = "is_done";
     public final String DUE_DATE = "due_date";
     public static final String POST = "POST";
     public static final String GET = "GET";
+    public static final String PUT = "PUT";
+    public static final String DELETE = "DELETE";
+    public static final String ERROR = "Error";
 
-    public ServerManager(Context context, OnTaskChangedListener onTaskChangedListener) {
+    public ServerManager(Context context, OnPostTaskListener onPostTaskListener) {
         this.context = context;
         this.requestURL = "";
         this.requestMethod = "";
         this.mJsonString = "";
         this.tasks = new ArrayList<>();
-        this.onTaskChangedListener = onTaskChangedListener;
+        this.onPostTaskListener = onPostTaskListener;
     }
 
     public ServerManager(Context context, OnSetTasksListener onSetTasksListener) {
@@ -61,51 +65,57 @@ public class ServerManager extends AsyncTask<String, String, String> {
         this.onSetTasksListener = onSetTasksListener;
     }
 
+    public ServerManager(Context context, OnPutTaskListener onPutTaskListener) {
+        this.context = context;
+        this.requestURL = "";
+        this.requestMethod = "";
+        this.mJsonString = "";
+        this.tasks = new ArrayList<>();
+        this.onPutTaskListener = onPutTaskListener;
+    }
+
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        if (result.startsWith("Error")) {
+        if (result.startsWith(ERROR)) {
             mJsonString = result;
             Toast.makeText(context, mJsonString, Toast.LENGTH_SHORT).show();
         } else {
             mJsonString = result;
-            if (requestMethod.equals("GET")) {
+            if (requestMethod.equals(GET)) {
                 showTasks();
                 onSetTasksListener.onSetTasks(tasks);
-            } else if (requestMethod.equals("POST")) {
-                onTaskChangedListener.onPostTask();
+            } else if (requestMethod.equals(POST)) {
+                onPostTaskListener.onPostTask();
+            } else if (requestMethod.equals(PUT)) {
+                onPutTaskListener.onPutTask();
             }
         }
     }
 
     @Override
-    protected void onProgressUpdate(String... values) {
-        super.onProgressUpdate(values);
-        if (requestMethod.equals(POST)) {
-            Task task = new Task();
-            task.setTaskId(values[0]);
-            task.setContent(values[1]);
-            task.setIsDone(Boolean.parseBoolean(values[2]));
-            task.setDueDate(Long.parseLong(values[3]));
-            tasks.add(task);
-        }
-    }
-
-
-    @Override
     protected String doInBackground(String... strings) {
         Map<String, Object> task = new HashMap<>();
-        if (strings[0].equals(POST_URL)) {
-            requestURL = POST_URL + strings[1];
-            requestMethod = POST;
+        switch (strings[0]) {
+            case GET:
+                requestURL = GET_URL;
+                requestMethod = GET;
+                break;
+            case POST:
+                requestURL = POST_URL + strings[1];
+                requestMethod = POST;
+                break;
+            case PUT:
+                requestURL = PUT_URL + strings[1];
+                requestMethod = PUT;
+                break;
+
+        }
+        if (requestMethod.equals(POST) || requestMethod.equals(PUT)) {
             task.put(TASK_ID, strings[1]);
             task.put(CONTENT, strings[2]);
             task.put(IS_DONE, Boolean.parseBoolean(strings[3]));
             task.put(DUE_DATE, Long.parseLong(strings[4]));
-
-        } else if (strings[0].equals(GET_URL)) {
-            requestURL = GET_URL;
-            requestMethod = GET;
         }
 
         try {
@@ -117,7 +127,7 @@ public class ServerManager extends AsyncTask<String, String, String> {
             connection.setRequestProperty("Accept", "application/json");
             if (requestMethod.equals(GET)) {
                 connection.connect();
-            } else if (requestMethod.equals(POST)) {
+            } else {
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setDoOutput(true);
 
@@ -130,7 +140,6 @@ public class ServerManager extends AsyncTask<String, String, String> {
                 os.flush();
                 os.close();
 
-                publishProgress(strings[1], strings[2], strings[3], strings[4]);
             }
             if (connection.getResponseCode() == connection.HTTP_OK) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));

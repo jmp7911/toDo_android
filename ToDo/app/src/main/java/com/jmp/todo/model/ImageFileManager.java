@@ -39,7 +39,7 @@ public class ImageFileManager {
         }
         return imageName;
     }
-    public String getPath(String imageContent) {
+    public String getPathFromInternalStorage(String imageContent) {
         try{
             File directory = context.getFilesDir();
             File image = new File(directory, imageContent);

@@ -2,11 +2,16 @@ package com.jmp.todo.model;
 
 import android.content.Context;
 
+import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
-import com.jmp.todo.iface.OnTaskChangedListener;
+import com.jmp.todo.iface.OnPostTaskListener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import static com.jmp.todo.model.ServerManager.GET;
+import static com.jmp.todo.model.ServerManager.POST;
+import static com.jmp.todo.model.ServerManager.PUT;
 
 public class TaskManager {
     private Context context;
@@ -14,6 +19,8 @@ public class TaskManager {
     private ArrayList<Task> tasks;
     public static final String GET_URL = "http://todo-android-study.herokuapp.com/tasks";
     public static final String POST_URL = "http://todo-android-study.herokuapp.com/task/";
+    public static final String PUT_URL = POST_URL;
+    public static final String DELETE_URL = POST_URL;
     public TaskManager(Context context) {
         this.context = context;
         this.dbManager = new DbManager(context);
@@ -30,16 +37,19 @@ public class TaskManager {
        return tasks.get(pos);
 
     }
-    public void setTask(Task task, int pos) {
+    public void setTask(Task task, int pos, OnPutTaskListener listener) {
         if (tasks.size() <= pos) return;
         tasks.set(pos, task);
         dbManager.updateTask(task);
+        ServerManager serverManager = new ServerManager(context, listener);
+        serverManager.execute(PUT, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
+                , Long.toString(task.getDueDate()));
     }
-    public void addTask(Task task, OnTaskChangedListener listener) {
+    public void addTask(Task task, OnPostTaskListener listener) {
         tasks.add(task);
         dbManager.insertTask(task);
         ServerManager serverManager = new ServerManager(context, listener);
-        serverManager.execute(POST_URL, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
+        serverManager.execute(POST, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
                 , Long.toString(task.getDueDate()));
 
     }
@@ -53,12 +63,13 @@ public class TaskManager {
                 task.remove();
             }
         }
+
     }
     public void getTasksFromDB() {
         tasks = dbManager.selectTasks();
     }
     public void getTasksFromServer(Context context, OnSetTasksListener listener) {
         ServerManager serverManager = new ServerManager(context, listener);
-        serverManager.execute(GET_URL);
+        serverManager.execute(GET);
     }
 }
