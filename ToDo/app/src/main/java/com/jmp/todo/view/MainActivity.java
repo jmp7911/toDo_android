@@ -20,10 +20,13 @@ import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.iface.OnPostTaskListener;
 import com.jmp.todo.model.ImageFileManager;
+import com.jmp.todo.model.ServerImageManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
 
 import java.util.ArrayList;
+
+import static com.jmp.todo.model.ServerTaskManager.POST;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_TASK = "taskItem";
     public static final String EXTRA_POSITION = "position";
     public static final int NO_EXTRA_DATA = -1;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -43,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 final int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
                 Task task = data.getParcelableExtra(EXTRA_TASK);
+//                if (!task.getImageContent().equals("null"))
                 String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                 task.setImageContent(imageContent);
                 taskManager.setTask(task, position, new OnPutTaskListener() {
@@ -58,8 +63,12 @@ public class MainActivity extends AppCompatActivity {
         } else if (requestCode == REQUEST_CODE_ADD) {
             if (resultCode == RESULT_OK) {
                 Task task = data.getParcelableExtra(EXTRA_TASK);
-                String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
-                task.setImageContent(imageContent);
+                if (!task.getImageContent().equals("null")) {
+                    String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
+                    task.setImageContent(imageContent);
+                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
+                    serverImageManager.execute(POST, imageContent);
+                }
                 taskManager.addTask(task, new OnPostTaskListener() {
                     @Override
                     public void onPostTask() {

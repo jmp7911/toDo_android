@@ -10,19 +10,16 @@ import com.jmp.todo.iface.OnPostTaskListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import static com.jmp.todo.model.ServerManager.DELETE;
-import static com.jmp.todo.model.ServerManager.GET;
-import static com.jmp.todo.model.ServerManager.POST;
-import static com.jmp.todo.model.ServerManager.PUT;
+import static com.jmp.todo.model.ServerTaskManager.DELETE;
+import static com.jmp.todo.model.ServerTaskManager.GET;
+import static com.jmp.todo.model.ServerTaskManager.POST;
+import static com.jmp.todo.model.ServerTaskManager.PUT;
 
 public class TaskManager {
     private Context context;
     private DbManager dbManager;
     private ArrayList<Task> tasks;
-    public static final String GET_URL = "http://todo-android-study.herokuapp.com/tasks";
-    public static final String POST_URL = "http://todo-android-study.herokuapp.com/task/";
-    public static final String PUT_URL = POST_URL;
-    public static final String DELETE_URL = POST_URL;
+
     public TaskManager(Context context) {
         this.context = context;
         this.dbManager = new DbManager(context);
@@ -43,15 +40,15 @@ public class TaskManager {
         if (tasks.size() <= pos) return;
         tasks.set(pos, task);
         dbManager.updateTask(task);
-        ServerManager serverManager = new ServerManager(context, listener);
-        serverManager.execute(PUT, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
+        ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
+        serverTaskManager.execute(PUT, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
                 , Long.toString(task.getDueDate()));
     }
     public void addTask(Task task, OnPostTaskListener listener) {
         tasks.add(task);
         dbManager.insertTask(task);
-        ServerManager serverManager = new ServerManager(context, listener);
-        serverManager.execute(POST, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
+        ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
+        serverTaskManager.execute(POST, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
                 , Long.toString(task.getDueDate()));
 
     }
@@ -62,8 +59,8 @@ public class TaskManager {
         dbManager.deleteDoneTask(tasks);
         for (Task task : tasks) {
             if (task.isDone()) {
-                ServerManager serverManager = new ServerManager(context, listener);
-                serverManager.execute(DELETE, task.getTaskId());
+                ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
+                serverTaskManager.execute(DELETE, task.getTaskId());
             }
         }
         for (Iterator<Task> task = tasks.iterator(); task.hasNext();) {
@@ -77,7 +74,7 @@ public class TaskManager {
         tasks = dbManager.selectTasks();
     }
     public void getTasksFromServer(Context context, OnSetTasksListener listener) {
-        ServerManager serverManager = new ServerManager(context, listener);
-        serverManager.execute(GET);
+        ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
+        serverTaskManager.execute(GET);
     }
 }

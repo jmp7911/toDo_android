@@ -62,7 +62,7 @@ public class ImageFileManager {
         }
     }
     public String createName() {
-        return UUID.randomUUID().toString().replace("-","") + ".jpg";
+        return UUID.randomUUID().toString().replace("-","") + ".png";
     }
     public Boolean isFileExist(String imageContent) {
         File directory = context.getFilesDir();

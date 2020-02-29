@@ -2,6 +2,7 @@ package com.jmp.todo.view;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,11 +107,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         } else {
             viewHolder.isDoneCkbox.setChecked(false);
         }
-        ImageFileManager fileManager = new ImageFileManager(context);
-        String imageContent = fileManager.getPathFromInternalStorage(task.getImageContent());
-        if (!imageContent.equals("null")) {
+        if (!task.getImageContent().equals("null")) {
+            ImageFileManager fileManager = new ImageFileManager(context);
+            String imageContent = fileManager.getPathFromInternalStorage(task.getImageContent());
             viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(imageContent));
         }
+
     }
     String getDday(Task task) {
         long today = System.currentTimeMillis();

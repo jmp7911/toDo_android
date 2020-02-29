@@ -2,6 +2,7 @@ package com.jmp.todo.model;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.jmp.todo.iface.OnDeleteTaskListener;
@@ -24,22 +25,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jmp.todo.model.TaskManager.DELETE_URL;
-import static com.jmp.todo.model.TaskManager.GET_URL;
-import static com.jmp.todo.model.TaskManager.POST_URL;
-import static com.jmp.todo.model.TaskManager.PUT_URL;
-
-
-public class ServerManager extends AsyncTask<String, String, String> {
+public class ServerTaskManager extends AsyncTask<String, String, String> {
     private Context context;
     private String requestURL;
     private String requestMethod;
     private String mJsonString;
     private ArrayList<Task> tasks;
-    private OnSetTasksListener onSetTasksListener;
-    private OnPostTaskListener onPostTaskListener;
-    private OnPutTaskListener onPutTaskListener;
-    private OnDeleteTaskListener onDeleteTaskListener;
+    private OnSetTasksListener onSetTasksListener = null;
+    private OnPostTaskListener onPostTaskListener = null;
+    private OnPutTaskListener onPutTaskListener = null;
+    private OnDeleteTaskListener onDeleteTaskListener = null;
+    public static final String GET_URL = "http://todo-android-study.herokuapp.com/tasks";
+    public static final String POST_URL = "http://todo-android-study.herokuapp.com/task/";
+    public static final String PUT_URL = POST_URL;
+    public static final String DELETE_URL = POST_URL;
     public final String TASK_ID = "id";
     public final String CONTENT = "content";
     public final String IS_DONE = "is_done";
@@ -48,9 +47,9 @@ public class ServerManager extends AsyncTask<String, String, String> {
     public static final String GET = "GET";
     public static final String PUT = "PUT";
     public static final String DELETE = "DELETE";
-    public static final String ERROR = "Error";
+    public static final String ERROR = "Error ";
 
-    public ServerManager(Context context, OnPostTaskListener onPostTaskListener) {
+    public ServerTaskManager(Context context, OnPostTaskListener onPostTaskListener) {
         this.context = context;
         this.requestURL = "";
         this.requestMethod = "";
@@ -59,7 +58,7 @@ public class ServerManager extends AsyncTask<String, String, String> {
         this.onPostTaskListener = onPostTaskListener;
     }
 
-    public ServerManager(Context context, OnSetTasksListener onSetTasksListener) {
+    public ServerTaskManager(Context context, OnSetTasksListener onSetTasksListener) {
         this.context = context;
         requestURL = "";
         requestMethod = "";
@@ -68,7 +67,7 @@ public class ServerManager extends AsyncTask<String, String, String> {
         this.onSetTasksListener = onSetTasksListener;
     }
 
-    public ServerManager(Context context, OnPutTaskListener onPutTaskListener) {
+    public ServerTaskManager(Context context, OnPutTaskListener onPutTaskListener) {
         this.context = context;
         this.requestURL = "";
         this.requestMethod = "";
@@ -77,7 +76,7 @@ public class ServerManager extends AsyncTask<String, String, String> {
         this.onPutTaskListener = onPutTaskListener;
     }
 
-    public ServerManager(Context context, OnDeleteTaskListener onDeleteTaskListener) {
+    public ServerTaskManager(Context context, OnDeleteTaskListener onDeleteTaskListener) {
         this.context = context;
         this.requestURL = "";
         this.requestMethod = "";
@@ -85,6 +84,7 @@ public class ServerManager extends AsyncTask<String, String, String> {
         this.tasks = new ArrayList<>();
         this.onDeleteTaskListener = onDeleteTaskListener;
     }
+
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
@@ -126,7 +126,9 @@ public class ServerManager extends AsyncTask<String, String, String> {
                 requestURL = DELETE_URL + strings[1];
                 requestMethod = DELETE;
                 break;
+
         }
+
         if (requestMethod.equals(DELETE)) {
             task.put(TASK_ID, strings[1]);
         } else if (requestMethod.equals(POST) || requestMethod.equals(PUT)) {
@@ -142,8 +144,8 @@ public class ServerManager extends AsyncTask<String, String, String> {
             connection.setConnectTimeout(10000);
             connection.setRequestMethod(requestMethod);
             connection.setDoInput(true);
-            connection.setRequestProperty("Accept", "application/json");
             if (requestMethod.equals(GET)) {
+                connection.setRequestProperty("Accept", "application/json");
                 connection.connect();
             } else {
                 connection.setRequestProperty("Content-Type", "application/json");
@@ -182,10 +184,10 @@ public class ServerManager extends AsyncTask<String, String, String> {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return "Error " + e.getMessage();
+            return ERROR + e.getMessage();
         } catch (JSONException e) {
             e.printStackTrace();
-            return "Error " + e.getMessage();
+            return ERROR + e.getMessage();
         }
     }
 
