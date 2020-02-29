@@ -26,7 +26,9 @@ import com.jmp.todo.model.TaskManager;
 
 import java.util.ArrayList;
 
+import static com.jmp.todo.model.ServerTaskManager.GET;
 import static com.jmp.todo.model.ServerTaskManager.POST;
+import static com.jmp.todo.model.ServerTaskManager.PUT;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -47,16 +49,18 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 final int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
                 Task task = data.getParcelableExtra(EXTRA_TASK);
-//                if (!task.getImageContent().equals("null"))
-                String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
-                task.setImageContent(imageContent);
+                if (!task.getImageContent().equals("null")) {
+                    String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
+                    task.setImageContent(imageContent);
+                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
+                    serverImageManager.execute(POST, imageContent);
+                }
                 taskManager.setTask(task, position, new OnPutTaskListener() {
                     @Override
                     public void onPutTask() {
                         taskAdapter.notifyItemChanged(position);
                     }
                 });
-                taskAdapter.notifyItemChanged(position);
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }
@@ -95,6 +99,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSetTasks(ArrayList<Task> tasks) {
                 taskManager.setTasks(tasks);
+                for(Task task : tasks) {
+                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
+                    serverImageManager.execute(GET, task.getImageContent());
+                }
+
                 taskAdapter = new TaskAdapter(getApplicationContext(), taskManager.getTasks());
                 taskAdapter.setOnItemClickListener(new OnItemClickListener() {
                     @Override

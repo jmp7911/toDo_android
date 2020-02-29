@@ -42,18 +42,21 @@ public class TaskManager {
         dbManager.updateTask(task);
         ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
         serverTaskManager.execute(PUT, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
-                , Long.toString(task.getDueDate()));
+                , Long.toString(task.getDueDate()), task.getImageContent());
     }
     public void addTask(Task task, OnPostTaskListener listener) {
         tasks.add(task);
         dbManager.insertTask(task);
         ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
         serverTaskManager.execute(POST, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
-                , Long.toString(task.getDueDate()));
+                , Long.toString(task.getDueDate()), task.getImageContent());
 
     }
     public void updateDoneTask(Task task) {
         dbManager.updateDoneTask(task);
+        ServerTaskManager serverTaskManager = new ServerTaskManager(context);
+        serverTaskManager.execute(PUT, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
+                , Long.toString(task.getDueDate()), task.getImageContent());
     }
     public void deleteDoneTask(OnDeleteTaskListener listener) {
         dbManager.deleteDoneTask(tasks);

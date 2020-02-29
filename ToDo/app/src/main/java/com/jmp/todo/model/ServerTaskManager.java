@@ -43,6 +43,7 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
     public final String CONTENT = "content";
     public final String IS_DONE = "is_done";
     public final String DUE_DATE = "due_date";
+    public final String IMAGE_CONTENT = "image";
     public static final String POST = "POST";
     public static final String GET = "GET";
     public static final String PUT = "PUT";
@@ -85,6 +86,14 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
         this.onDeleteTaskListener = onDeleteTaskListener;
     }
 
+    public ServerTaskManager(Context context) {
+        this.context = context;
+        this.requestURL = "";
+        this.requestMethod = "";
+        this.mJsonString = "";
+        this.tasks = new ArrayList<>();
+    }
+
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
@@ -95,15 +104,28 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
             mJsonString = result;
             if (requestMethod.equals(GET)) {
                 showTasks();
-                onSetTasksListener.onSetTasks(tasks);
+                if (onSetTasksListener != null) {
+                    onSetTasksListener.onSetTasks(tasks);
+                }
             } else if (requestMethod.equals(POST)) {
-                onPostTaskListener.onPostTask();
+                if (onPostTaskListener != null) {
+                    onPostTaskListener.onPostTask();
+                }
             } else if (requestMethod.equals(PUT)) {
-                onPutTaskListener.onPutTask();
+                if (onPutTaskListener != null) {
+                    onPutTaskListener.onPutTask();
+                }
             } else if (requestMethod.equals(DELETE)) {
-                onDeleteTaskListener.onDeleteTask();
+                if (onDeleteTaskListener != null) {
+                    onDeleteTaskListener.onDeleteTask();
+                }
             }
         }
+    }
+
+    @Override
+    protected void onProgressUpdate(String... values) {
+        super.onProgressUpdate(values);
     }
 
     @Override
@@ -136,6 +158,7 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
             task.put(CONTENT, strings[2]);
             task.put(IS_DONE, Boolean.parseBoolean(strings[3]));
             task.put(DUE_DATE, Long.parseLong(strings[4]));
+            task.put(IMAGE_CONTENT, strings[5]);
         }
 
         try {
@@ -202,12 +225,14 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
                 String content = task.getString(CONTENT);
                 Boolean isDone = task.getBoolean(IS_DONE);
                 long dueDate = task.getLong(DUE_DATE);
+                String imageContent = task.getString(IMAGE_CONTENT);
 
                 Task task1 = new Task();
                 task1.setTaskId(taskId);
                 task1.setContent(content);
                 task1.setIsDone(isDone);
                 task1.setDueDate(dueDate);
+                task1.setImageContent(imageContent);
                 tasks1.add(task1);
 
             }
