@@ -4,7 +4,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -28,7 +27,6 @@ import java.util.ArrayList;
 
 import static com.jmp.todo.model.ServerTaskManager.GET;
 import static com.jmp.todo.model.ServerTaskManager.POST;
-import static com.jmp.todo.model.ServerTaskManager.PUT;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -41,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_TASK = "taskItem";
     public static final String EXTRA_POSITION = "position";
     public static final int NO_EXTRA_DATA = -1;
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -89,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         fileManager = new ImageFileManager(getApplicationContext());
         taskManager = new TaskManager(this);
         recyclerView = findViewById(R.id.container);
@@ -99,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSetTasks(ArrayList<Task> tasks) {
                 taskManager.setTasks(tasks);
-                for(Task task : tasks) {
+                for (Task task : tasks) {
                     ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
                     serverImageManager.execute(GET, task.getImageContent());
                 }
@@ -148,6 +146,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
 
 }

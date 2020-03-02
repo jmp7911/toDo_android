@@ -3,14 +3,21 @@ package com.jmp.todo.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.sql.Timestamp;
 import java.util.UUID;
 
 public class Task implements Parcelable {
+    @SerializedName("id")
     private String taskId;
+    @SerializedName("content")
     private String content;
+    @SerializedName("is_done")
     private boolean isDone;
+    @SerializedName("due_date")
     private long dueDate;
+    @SerializedName("image")
     private String imageContent;
 
     public String getTaskId() {
