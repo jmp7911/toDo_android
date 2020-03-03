@@ -1,15 +1,8 @@
 package com.jmp.todo.iface;
 
-import com.jmp.todo.model.ResponseTask;
 import com.jmp.todo.model.Task;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.transform.Result;
-
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;

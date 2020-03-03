@@ -54,9 +54,7 @@ public class TaskManager {
         if (tasks.size() <= pos) return;
         tasks.set(pos, task);
         dbManager.updateTask(task);
-        ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
-        serverTaskManager.execute(PUT, task.getTaskId(), task.getContent(), Boolean.toString(task.isDone())
-                , Long.toString(task.getDueDate()), task.getImageContent());
+        putTaskService(task, listener);
     }
     public void addTask(Task task, OnPostTaskListener listener) {
         tasks.add(task);
@@ -121,5 +119,18 @@ public class TaskManager {
             }
         });
     }
-   
+    private void putTaskService(Task task, final OnPutTaskListener onPutTaskListener) {
+        Call<Task> putTask = apiService.putTask(task.getTaskId(), task);
+        putTask.enqueue(new Callback<Task>() {
+            @Override
+            public void onResponse(Call<Task> call, Response<Task> response) {
+                onPutTaskListener.onPutTask();
+            }
+
+            @Override
+            public void onFailure(Call<Task> call, Throwable t) {
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }

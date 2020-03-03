@@ -51,14 +51,6 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
     public static final String ERROR = "Error ";
 
 
-    public ServerTaskManager(Context context, OnPutTaskListener onPutTaskListener) {
-        this.context = context;
-        this.requestURL = "";
-        this.requestMethod = "";
-        this.mJsonString = "";
-        this.tasks = new ArrayList<>();
-        this.onPutTaskListener = onPutTaskListener;
-    }
 
     public ServerTaskManager(Context context, OnDeleteTaskListener onDeleteTaskListener) {
         this.context = context;
@@ -85,21 +77,12 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
             Toast.makeText(context, mJsonString, Toast.LENGTH_SHORT).show();
         } else {
             mJsonString = result;
-            if (requestMethod.equals(PUT)) {
-                if (onPutTaskListener != null) {
-                    onPutTaskListener.onPutTask();
-                }
-            } else if (requestMethod.equals(DELETE)) {
+            if (requestMethod.equals(DELETE)) {
                 if (onDeleteTaskListener != null) {
                     onDeleteTaskListener.onDeleteTask();
                 }
             }
         }
-    }
-
-    @Override
-    protected void onProgressUpdate(String... values) {
-        super.onProgressUpdate(values);
     }
 
     @Override
