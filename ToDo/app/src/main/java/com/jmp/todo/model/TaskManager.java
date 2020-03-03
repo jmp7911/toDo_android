@@ -37,7 +37,6 @@ public class TaskManager {
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         this.apiService = retrofit.create(APIService.class);
-
     }
     public ArrayList<Task> getTasks() {
         return tasks;
@@ -92,16 +91,16 @@ public class TaskManager {
         serverTaskManager.execute(GET);
     }
     private void postTaskService(Task task, final OnPostTaskListener onPostTaskListener) {
-        Call<ResponseTask> postTask = apiService.postTask(task.getTaskId(), task);
-        postTask.enqueue(new Callback<ResponseTask>() {
+        Call<Task> postTask = apiService.postTask(task.getTaskId(), task);
+        postTask.enqueue(new Callback<Task>() {
             @Override
-            public void onResponse(Call<ResponseTask> call, Response<ResponseTask> response) {
+            public void onResponse(Call<Task> call, Response<Task> response) {
                 onPostTaskListener.onPostTask();
 
             }
 
             @Override
-            public void onFailure(Call<ResponseTask> call, Throwable t) {
+            public void onFailure(Call<Task> call, Throwable t) {
 
             }
         });

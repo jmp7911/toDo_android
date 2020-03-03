@@ -21,15 +21,15 @@ import retrofit2.http.Path;
 public interface APIService {
 
     @GET("/tasks")
-    Call<ArrayList<ResponseTask>> getTasks();
+    Call<ArrayList<Task>> getTasks();
     @POST("/task/{task-id}")
-    Call<ResponseTask> postTask(@Path("task-id") String taskId, @Body Task task);
+    Call<Task> postTask(@Path("task-id") String taskId, @Body Task task);
     @PUT("/task/{task-id}")
-    Call<ResponseTask> putTask(@Path("task-id") String taskId);
+    Call<Task> putTask(@Path("task-id") String taskId);
     @DELETE("/task/{task-id}")
-    Call<ResponseTask> deleteTask(@Path("task-id") String taskId);
+    Call<Task> deleteTask(@Path("task-id") String taskId);
     @GET("/images/{filename}")
-    Call<ResponseTask> getImage(@Path("filename") String imageContent);
+    Call<Task> getImage(@Path("filename") String imageContent);
     @POST("/upload")
-    Call<ResponseTask> postImage();
+    Call<Task> postImage();
 }
