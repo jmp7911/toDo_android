@@ -50,23 +50,6 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
     public static final String DELETE = "DELETE";
     public static final String ERROR = "Error ";
 
-    public ServerTaskManager(Context context, OnPostTaskListener onPostTaskListener) {
-        this.context = context;
-        this.requestURL = "";
-        this.requestMethod = "";
-        this.mJsonString = "";
-        this.tasks = new ArrayList<>();
-        this.onPostTaskListener = onPostTaskListener;
-    }
-
-    public ServerTaskManager(Context context, OnSetTasksListener onSetTasksListener) {
-        this.context = context;
-        requestURL = "";
-        requestMethod = "";
-        mJsonString = "";
-        tasks = new ArrayList<>();
-        this.onSetTasksListener = onSetTasksListener;
-    }
 
     public ServerTaskManager(Context context, OnPutTaskListener onPutTaskListener) {
         this.context = context;
@@ -102,16 +85,7 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
             Toast.makeText(context, mJsonString, Toast.LENGTH_SHORT).show();
         } else {
             mJsonString = result;
-            if (requestMethod.equals(GET)) {
-                showTasks();
-                if (onSetTasksListener != null) {
-                    onSetTasksListener.onSetTasks(tasks);
-                }
-            } else if (requestMethod.equals(POST)) {
-                if (onPostTaskListener != null) {
-                    onPostTaskListener.onPostTask();
-                }
-            } else if (requestMethod.equals(PUT)) {
+            if (requestMethod.equals(PUT)) {
                 if (onPutTaskListener != null) {
                     onPutTaskListener.onPutTask();
                 }

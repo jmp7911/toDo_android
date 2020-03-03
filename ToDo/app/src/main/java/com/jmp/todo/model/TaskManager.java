@@ -2,6 +2,7 @@ package com.jmp.todo.model;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.jmp.todo.iface.APIService;
 import com.jmp.todo.iface.OnDeleteTaskListener;
@@ -86,24 +87,39 @@ public class TaskManager {
     public void getTasksFromDB() {
         tasks = dbManager.selectTasks();
     }
-    public void getTasksFromServer(Context context, OnSetTasksListener listener) {
-        ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
-        serverTaskManager.execute(GET);
-    }
+
     private void postTaskService(Task task, final OnPostTaskListener onPostTaskListener) {
         Call<Task> postTask = apiService.postTask(task.getTaskId(), task);
         postTask.enqueue(new Callback<Task>() {
             @Override
             public void onResponse(Call<Task> call, Response<Task> response) {
                 onPostTaskListener.onPostTask();
-
             }
 
             @Override
             public void onFailure(Call<Task> call, Throwable t) {
-
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+    public void getTasksService(final OnSetTasksListener onSetTasksListener) {
+        Call<ArrayList<Task>> getTasks = apiService.getTasks();
+        getTasks.enqueue(new Callback<ArrayList<Task>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Task>> call, Response<ArrayList<Task>> response) {
+                tasks = response.body();
+                onSetTasksListener.onSetTasks();
+                for (Task task : tasks) {
+                    ServerImageManager serverImageManager = new ServerImageManager(context);
+                    serverImageManager.execute(GET, task.getImageContent());
+                }
+            }
 
+            @Override
+            public void onFailure(Call<ArrayList<Task>> call, Throwable t) {
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+   
 }

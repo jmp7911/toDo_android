@@ -93,15 +93,9 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         //taskManager.getTasksFromDB();
-        taskManager.getTasksFromServer(this, new OnSetTasksListener() {
+        taskManager.getTasksService(new OnSetTasksListener() {
             @Override
-            public void onSetTasks(ArrayList<Task> tasks) {
-                taskManager.setTasks(tasks);
-                for (Task task : tasks) {
-                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
-                    serverImageManager.execute(GET, task.getImageContent());
-                }
-
+            public void onSetTasks() {
                 taskAdapter = new TaskAdapter(getApplicationContext(), taskManager.getTasks());
                 taskAdapter.setOnItemClickListener(new OnItemClickListener() {
                     @Override
@@ -122,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
                 recyclerView.setAdapter(taskAdapter);
             }
         });
-
         FloatingActionButton fab = findViewById(R.id.fab_add);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override

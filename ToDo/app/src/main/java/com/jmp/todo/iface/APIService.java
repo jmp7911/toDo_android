@@ -25,7 +25,7 @@ public interface APIService {
     @POST("/task/{task-id}")
     Call<Task> postTask(@Path("task-id") String taskId, @Body Task task);
     @PUT("/task/{task-id}")
-    Call<Task> putTask(@Path("task-id") String taskId);
+    Call<Task> putTask(@Path("task-id") String taskId, @Body Task task);
     @DELETE("/task/{task-id}")
     Call<Task> deleteTask(@Path("task-id") String taskId);
     @GET("/images/{filename}")
