@@ -71,8 +71,7 @@ public class TaskManager {
         dbManager.deleteDoneTask(tasks);
         for (Task task : tasks) {
             if (task.isDone()) {
-                ServerTaskManager serverTaskManager = new ServerTaskManager(context, listener);
-                serverTaskManager.execute(DELETE, task.getTaskId());
+                deleteTaskService(task.getTaskId(), listener);
             }
         }
         for (Iterator<Task> task = tasks.iterator(); task.hasNext();) {
@@ -130,6 +129,20 @@ public class TaskManager {
             @Override
             public void onFailure(Call<Task> call, Throwable t) {
                 Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void deleteTaskService(String taskId, final OnDeleteTaskListener onDeleteTaskListener) {
+        Call<Task> deleteDoneTask = apiService.deleteDoneTask(taskId);
+        deleteDoneTask.enqueue(new Callback<Task>() {
+            @Override
+            public void onResponse(Call<Task> call, Response<Task> response) {
+                onDeleteTaskListener.onDeleteTask();
+            }
+
+            @Override
+            public void onFailure(Call<Task> call, Throwable t) {
+
             }
         });
     }

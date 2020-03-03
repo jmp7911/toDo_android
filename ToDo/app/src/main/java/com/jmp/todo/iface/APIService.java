@@ -20,7 +20,7 @@ public interface APIService {
     @PUT("/task/{task-id}")
     Call<Task> putTask(@Path("task-id") String taskId, @Body Task task);
     @DELETE("/task/{task-id}")
-    Call<Task> deleteTask(@Path("task-id") String taskId);
+    Call<Task> deleteDoneTask(@Path("task-id") String taskId);
     @GET("/images/{filename}")
     Call<Task> getImage(@Path("filename") String imageContent);
     @POST("/upload")

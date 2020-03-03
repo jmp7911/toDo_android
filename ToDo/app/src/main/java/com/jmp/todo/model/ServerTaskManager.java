@@ -171,35 +171,7 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
         }
     }
 
-    private void showTasks() {
-        ArrayList<Task> tasks1 = new ArrayList<>();
-        try {
-            JSONArray jsonArray = new JSONArray(mJsonString);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject task = jsonArray.getJSONObject(i);
 
-                String taskId = task.getString(TASK_ID);
-                String content = task.getString(CONTENT);
-                Boolean isDone = task.getBoolean(IS_DONE);
-                long dueDate = task.getLong(DUE_DATE);
-                String imageContent = task.getString(IMAGE_CONTENT);
-
-                Task task1 = new Task();
-                task1.setTaskId(taskId);
-                task1.setContent(content);
-                task1.setIsDone(isDone);
-                task1.setDueDate(dueDate);
-                task1.setImageContent(imageContent);
-                tasks1.add(task1);
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        tasks = tasks1;
-
-    }
 
 
 
