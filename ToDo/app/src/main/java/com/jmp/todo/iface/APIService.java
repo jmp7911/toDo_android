@@ -3,12 +3,19 @@ package com.jmp.todo.iface;
 import com.jmp.todo.model.Task;
 
 import java.util.ArrayList;
+
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 
 public interface APIService {
@@ -22,7 +29,8 @@ public interface APIService {
     @DELETE("/task/{task-id}")
     Call<Task> deleteDoneTask(@Path("task-id") String taskId);
     @GET("/images/{filename}")
-    Call<Task> getImage(@Path("filename") String imageContent);
+    Call<ResponseBody> getImage(@Path("filename") String imageContent);
+    @Multipart
     @POST("/upload")
-    Call<Task> postImage();
+    Call<String> postImage(@Part MultipartBody.Part image);
 }

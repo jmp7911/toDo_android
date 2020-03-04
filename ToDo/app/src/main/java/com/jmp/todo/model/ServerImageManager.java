@@ -22,12 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jmp.todo.model.ServerTaskManager.DELETE;
-import static com.jmp.todo.model.ServerTaskManager.ERROR;
-import static com.jmp.todo.model.ServerTaskManager.GET;
-import static com.jmp.todo.model.ServerTaskManager.GET_URL;
-import static com.jmp.todo.model.ServerTaskManager.POST;
-import static com.jmp.todo.model.ServerTaskManager.PUT;
 
 public class ServerImageManager extends AsyncTask<String, Void, String> {
     private Context context;
@@ -35,7 +29,11 @@ public class ServerImageManager extends AsyncTask<String, Void, String> {
     private String requestMethod;
     private final String UPLOAD_IMAGE_URL = "http://todo-android-study.herokuapp.com/upload";
     private final String GET_IMAGE_URL = "http://todo-android-study.herokuapp.com/images/";
-
+    public static final String POST = "POST";
+    public static final String GET = "GET";
+    public static final String PUT = "PUT";
+    public static final String DELETE = "DELETE";
+    public static final String ERROR = "Error ";
     public final String UPLOAD = "upload";
     public final String DOWNLOAD = "download";
     public final String FILE_NAME = "/Users/nathanpark/Desktop/";

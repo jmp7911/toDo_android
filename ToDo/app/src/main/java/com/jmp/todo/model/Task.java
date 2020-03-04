@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.sql.Timestamp;
 import java.util.UUID;
 
 public class Task implements Parcelable {

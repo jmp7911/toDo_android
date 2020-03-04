@@ -23,10 +23,7 @@ import com.jmp.todo.model.ServerImageManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
 
-import java.util.ArrayList;
-
-import static com.jmp.todo.model.ServerTaskManager.GET;
-import static com.jmp.todo.model.ServerTaskManager.POST;
+import static com.jmp.todo.model.TaskManager.POST;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -67,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
                 if (!task.getImageContent().equals("null")) {
                     String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                     task.setImageContent(imageContent);
-                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
-                    serverImageManager.execute(POST, imageContent);
+//                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
+//                    serverImageManager.execute(POST, imageContent);
                 }
                 taskManager.addTask(task, new OnPostTaskListener() {
                     @Override
@@ -93,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         //taskManager.getTasksFromDB();
-        taskManager.getTasksService(new OnSetTasksListener() {
+        taskManager.GETTasksService(new OnSetTasksListener() {
             @Override
             public void onSetTasks() {
                 taskAdapter = new TaskAdapter(getApplicationContext(), taskManager.getTasks());
@@ -114,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 recyclerView.setAdapter(taskAdapter);
+
             }
         });
         FloatingActionButton fab = findViewById(R.id.fab_add);
