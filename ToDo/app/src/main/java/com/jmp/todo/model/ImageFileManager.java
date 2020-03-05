@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,6 +40,7 @@ public class ImageFileManager {
         }
         return imageName;
     }
+
     public String getPathFromInternalStorage(String imageContent) {
         try{
             File directory = context.getFilesDir();
@@ -71,6 +73,13 @@ public class ImageFileManager {
             return true;
         } else {
             return false;
+        }
+    }
+    public void renameFile(String oldName, String newName) {
+        File file = new File(context.getFilesDir(), oldName);
+        File newFile = new File(context.getFilesDir(), newName);
+        if (file.exists()) {
+            file.renameTo(newFile);
         }
     }
 }

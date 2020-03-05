@@ -2,12 +2,15 @@ package com.jmp.todo.model;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.jmp.todo.iface.OnImagePostExecuteListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,17 +25,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jmp.todo.model.ServerTaskManager.DELETE;
 import static com.jmp.todo.model.ServerTaskManager.ERROR;
 import static com.jmp.todo.model.ServerTaskManager.GET;
-import static com.jmp.todo.model.ServerTaskManager.GET_URL;
 import static com.jmp.todo.model.ServerTaskManager.POST;
-import static com.jmp.todo.model.ServerTaskManager.PUT;
 
 public class ServerImageManager extends AsyncTask<String, Void, String> {
     private Context context;
     private String requestURL;
     private String requestMethod;
+    private OnImagePostExecuteListener onImagePostExecuteListener;
     private final String UPLOAD_IMAGE_URL = "http://todo-android-study.herokuapp.com/upload";
     private final String GET_IMAGE_URL = "http://todo-android-study.herokuapp.com/images/";
 
@@ -46,23 +47,41 @@ public class ServerImageManager extends AsyncTask<String, Void, String> {
         requestURL = "";
     }
 
+    public ServerImageManager(Context context, OnImagePostExecuteListener onImagePostExecuteListener) {
+        this.context = context;
+        requestURL = "";
+        requestMethod = "";
+        this.onImagePostExecuteListener = onImagePostExecuteListener;
+    }
+
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         if (result.startsWith(ERROR)) {
             Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
         } else {
+
             if (requestMethod.equals(GET)) {
-                Log.d("uploadmessage", "onPostExecute: "+result);
+                try{
+                    JSONObject jsonObject = new JSONObject(result);
+                    onImagePostExecuteListener.onPostExecute(jsonObject.getString("filename"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             } else if (requestMethod.equals(POST)) {
-                Log.d("uploadmessage", "onPostExecute: "+result);
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    onImagePostExecuteListener.onPostExecute(jsonObject.getString("filename"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     @Override
     protected String doInBackground(String... strings) {
-        Map<String, Object> task = new HashMap<>();
+        Map<String, String> task = new HashMap<>();
         String boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
         String lineEnd = "\r\n";
         String twoHypens = "--";
@@ -99,7 +118,7 @@ public class ServerImageManager extends AsyncTask<String, Void, String> {
                 postDataBuilder.append(delimiter);
                 if (!task.get(UPLOAD).toString().equals("null")) {
                     ImageFileManager imageFileManager = new ImageFileManager(context);
-                    String filePath = imageFileManager.getPathFromInternalStorage(task.get(UPLOAD).toString());
+                    String filePath = imageFileManager.getPathFromInternalStorage(task.get(UPLOAD));
                     File taskImage = new File(filePath);
                     postDataBuilder.append("Content-Disposition: form-data; name=\"" + UPLOAD + "\"; filename=\""
                             + fileName + "\"" + lineEnd);
@@ -124,7 +143,7 @@ public class ServerImageManager extends AsyncTask<String, Void, String> {
 
             if (connection.getResponseCode() == connection.HTTP_OK) {
                 if (requestMethod.equals(GET)) {
-                    File image = new File(internalStoragePath, task.get(DOWNLOAD).toString());
+                    File image = new File(internalStoragePath, task.get(DOWNLOAD));
                     InputStream is = connection.getInputStream();
                     OutputStream outStream = new FileOutputStream(image);
 
@@ -134,6 +153,7 @@ public class ServerImageManager extends AsyncTask<String, Void, String> {
                     while ((len = is.read(buf)) > 0) {
                         outStream.write(buf, 0, len);
                     }
+                    outStream.flush();
                     outStream.close();
                     is.close();
                     connection.disconnect();

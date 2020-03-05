@@ -2,7 +2,6 @@ package com.jmp.todo.view;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,14 +12,19 @@ import android.widget.TextView;
 
 import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
+import com.jmp.todo.iface.OnImagePostExecuteListener;
 import com.jmp.todo.iface.OnItemClickListener;
 import com.jmp.todo.model.ImageFileManager;
+import com.jmp.todo.model.ServerImageManager;
 import com.jmp.todo.model.Task;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import static com.jmp.todo.model.ServerTaskManager.GET;
 
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
@@ -97,7 +101,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int position) {
         Task task = tasks.get(position);
         viewHolder.dueDateView.setText(getDday(task));
         String content = task.getContent();
@@ -108,9 +112,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             viewHolder.isDoneCkbox.setChecked(false);
         }
         if (!task.getImageContent().equals("null")) {
-            ImageFileManager fileManager = new ImageFileManager(context);
-            String imageContent = fileManager.getPathFromInternalStorage(task.getImageContent());
-            viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(imageContent));
+            final ImageFileManager fileManager = new ImageFileManager(context);
+            File image = new File(fileManager.getPathFromInternalStorage(task.getImageContent()));
+            if (image.exists()) {
+                viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(image.toString()));
+            } else {
+                ServerImageManager serverImageManager = new ServerImageManager(context, new OnImagePostExecuteListener() {
+                    @Override
+                    public void onPostExecute(String fileName) {
+                        viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(fileManager.getPathFromInternalStorage(fileName)));
+                        notifyItemChanged(position);
+                    }
+                });
+                serverImageManager.execute(GET, task.getImageContent());
+            }
+
         }
 
     }

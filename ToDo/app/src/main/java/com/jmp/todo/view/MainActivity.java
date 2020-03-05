@@ -16,6 +16,7 @@ import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnDeleteTaskListener;
 import com.jmp.todo.iface.OnItemClickListener;
+import com.jmp.todo.iface.OnImagePostExecuteListener;
 import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.iface.OnPostTaskListener;
@@ -28,7 +29,6 @@ import java.util.ArrayList;
 
 import static com.jmp.todo.model.ServerTaskManager.GET;
 import static com.jmp.todo.model.ServerTaskManager.POST;
-import static com.jmp.todo.model.ServerTaskManager.PUT;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -48,37 +48,50 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_UPDATE) {
             if (resultCode == RESULT_OK) {
                 final int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
-                Task task = data.getParcelableExtra(EXTRA_TASK);
+                final Task task = data.getParcelableExtra(EXTRA_TASK);
                 if (!task.getImageContent().equals("null")) {
                     String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                     task.setImageContent(imageContent);
-                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
+                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext(), new OnImagePostExecuteListener() {
+                        @Override
+                        public void onPostExecute(String fileName) {
+                            fileManager.renameFile(task.getImageContent(), fileName);
+                            task.setImageContent(fileName);
+                            taskManager.setTask(task, position, new OnPutTaskListener() {
+                                @Override
+                                public void onPutTask() {
+                                    taskAdapter.notifyItemChanged(position);
+                                }
+                            });
+                        }
+                    });
                     serverImageManager.execute(POST, imageContent);
                 }
-                taskManager.setTask(task, position, new OnPutTaskListener() {
-                    @Override
-                    public void onPutTask() {
-                        taskAdapter.notifyItemChanged(position);
-                    }
-                });
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_CODE_ADD) {
             if (resultCode == RESULT_OK) {
-                Task task = data.getParcelableExtra(EXTRA_TASK);
+                final Task task = data.getParcelableExtra(EXTRA_TASK);
                 if (!task.getImageContent().equals("null")) {
                     String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                     task.setImageContent(imageContent);
-                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
+                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext(), new OnImagePostExecuteListener() {
+                        @Override
+                        public void onPostExecute(String fileName) {
+                            fileManager.renameFile(task.getImageContent(), fileName);
+                            task.setImageContent(fileName);
+                            taskManager.addTask(task, new OnPostTaskListener() {
+                                @Override
+                                public void onPostTask() {
+                                    taskAdapter.notifyItemInserted(taskManager.getTasks().size());
+                                }
+                            });
+                        }
+                    });
                     serverImageManager.execute(POST, imageContent);
                 }
-                taskManager.addTask(task, new OnPostTaskListener() {
-                    @Override
-                    public void onPostTask() {
-                        taskAdapter.notifyItemInserted(taskManager.getTasks().size());
-                    }
-                });
+
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
             }
@@ -99,11 +112,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSetTasks(ArrayList<Task> tasks) {
                 taskManager.setTasks(tasks);
-                for(Task task : tasks) {
-                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
-                    serverImageManager.execute(GET, task.getImageContent());
-                }
-
                 taskAdapter = new TaskAdapter(getApplicationContext(), taskManager.getTasks());
                 taskAdapter.setOnItemClickListener(new OnItemClickListener() {
                     @Override
