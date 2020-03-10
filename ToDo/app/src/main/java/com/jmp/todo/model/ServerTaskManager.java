@@ -235,6 +235,7 @@ public class ServerTaskManager extends AsyncTask<String, String, String> {
                 task1.setImageContent(imageContent);
                 tasks1.add(task1);
 
+
             }
         } catch (JSONException e) {
             e.printStackTrace();

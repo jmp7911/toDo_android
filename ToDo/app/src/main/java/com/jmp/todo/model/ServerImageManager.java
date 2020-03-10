@@ -60,14 +60,8 @@ public class ServerImageManager extends AsyncTask<String, Void, String> {
         if (result.startsWith(ERROR)) {
             Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
         } else {
-
             if (requestMethod.equals(GET)) {
-                try{
-                    JSONObject jsonObject = new JSONObject(result);
-                    onImagePostExecuteListener.onPostExecute(jsonObject.getString("filename"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                onImagePostExecuteListener.onPostExecute(result);
             } else if (requestMethod.equals(POST)) {
                 try {
                     JSONObject jsonObject = new JSONObject(result);

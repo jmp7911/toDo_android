@@ -102,7 +102,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int position) {
-        Task task = tasks.get(position);
+        final Task task = tasks.get(position);
         viewHolder.dueDateView.setText(getDday(task));
         String content = task.getContent();
         viewHolder.contentView.setText(content);
@@ -120,7 +120,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                 ServerImageManager serverImageManager = new ServerImageManager(context, new OnImagePostExecuteListener() {
                     @Override
                     public void onPostExecute(String fileName) {
-                        viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(fileManager.getPathFromInternalStorage(fileName)));
+                        viewHolder.taskImage.setImageDrawable(Drawable.createFromPath(fileManager.getPathFromInternalStorage(task.getImageContent())));
                         notifyItemChanged(position);
                     }
                 });
