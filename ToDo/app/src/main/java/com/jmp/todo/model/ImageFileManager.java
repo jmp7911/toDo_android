@@ -84,4 +84,11 @@ public class ImageFileManager {
             return false;
         }
     }
+    public void renameFile(String oldName, String newName) {
+        File file = new File(context.getFilesDir(), oldName);
+        File newFile = new File(context.getFilesDir(), newName);
+        if (file.exists()) {
+            file.renameTo(newFile);
+        }
+    }
 }

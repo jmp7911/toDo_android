@@ -6,19 +6,27 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.jmp.todo.R;
 import com.jmp.todo.iface.APIService;
 import com.jmp.todo.iface.OnDeleteTaskListener;
+import com.jmp.todo.iface.OnImagePostExecuteListener;
 import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.iface.OnPostTaskListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -41,13 +49,16 @@ public class TaskManager {
     public static final String PUT = "PUT";
     public static final String DELETE = "DELETE";
     public final String UPLOAD = "upload";
+
     public TaskManager(Context context) {
         this.context = context;
         this.dbManager = new DbManager(context);
         this.imageFileManager = new ImageFileManager(context);
         this.tasks = new ArrayList<>();
         this.retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
         this.apiService = retrofit.create(APIService.class);
     }
     public ArrayList<Task> getTasks() {
@@ -71,8 +82,8 @@ public class TaskManager {
         tasks.add(task);
         dbManager.insertTask(task);
         POSTTaskService(task, listener);
-        POSTImageService(task.getImageContent());
     }
+
     public void updateDoneTask(Task task) {
         dbManager.updateDoneTask(task);
         PUTTaskService(task);
@@ -96,25 +107,37 @@ public class TaskManager {
 
     }
 
-    private void POSTImageService(String imageContent) {
-        File image = new File(context.getFilesDir(), imageContent);
-        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), image);
-        MultipartBody.Part body = MultipartBody.Part.createFormData(UPLOAD, imageContent, requestBody);
-        Call<String> postImage = apiService.postImage(body);
-        postImage.enqueue(new Callback<String>() {
+    public void POSTImageService(final Task task, final OnImagePostExecuteListener onImagePostExecuteListener) {
+        File image = new File(context.getFilesDir(), task.getImageContent());
+        final String FILE_NAME = "/Users/nathanpark/Desktop/" + image.getName();
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("upload",FILE_NAME, RequestBody.create(MultipartBody.FORM, image))
+                .build();
+
+        Request request = new Request.Builder()
+                .url(BASE_URL + "/upload")
+                .post(requestBody)
+                .build();
+        OkHttpClient okHttpClient = new OkHttpClient();
+        okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                Log.d("retrofitimage", "onResponse: "+response.body());
+            public void onFailure(okhttp3.Call call, IOException e) {
+
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
-                t.printStackTrace();
+            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                try {
+                    JSONObject fileName = new JSONObject(response.body().string());
+                    onImagePostExecuteListener.onPostExecute(fileName.getString("filename"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
-
     }
-    private void POSTTaskService(Task task, final OnPostTaskListener onPostTaskListener) {
+    private void POSTTaskService(final Task task, final OnPostTaskListener onPostTaskListener) {
         Call<Task> postTask = apiService.postTask(task.getTaskId(), task);
         postTask.enqueue(new Callback<Task>() {
             @Override

@@ -14,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jmp.todo.R;
 import com.jmp.todo.iface.OnCheckDoneListener;
 import com.jmp.todo.iface.OnDeleteTaskListener;
+import com.jmp.todo.iface.OnImagePostExecuteListener;
 import com.jmp.todo.iface.OnItemClickListener;
 import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
@@ -60,17 +61,22 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQUEST_CODE_ADD) {
             if (resultCode == RESULT_OK) {
-                Task task = data.getParcelableExtra(EXTRA_TASK);
+                final Task task = data.getParcelableExtra(EXTRA_TASK);
                 if (!task.getImageContent().equals("null")) {
                     String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                     task.setImageContent(imageContent);
-//                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
-//                    serverImageManager.execute(POST, imageContent);
                 }
-                taskManager.addTask(task, new OnPostTaskListener() {
+                taskManager.POSTImageService(task, new OnImagePostExecuteListener() {
                     @Override
-                    public void onPostTask() {
-                        taskAdapter.notifyItemInserted(taskManager.getTasks().size());
+                    public void onPostExecute(String fileName) {
+                        fileManager.renameFile(task.getImageContent(), fileName);
+                        task.setImageContent(fileName);
+                        taskManager.addTask(task, new OnPostTaskListener() {
+                            @Override
+                            public void onPostTask() {
+                                taskAdapter.notifyItemInserted(taskManager.getTasks().size());
+                            }
+                        });
                     }
                 });
             } else {
