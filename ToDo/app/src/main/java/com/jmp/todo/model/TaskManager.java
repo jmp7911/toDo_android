@@ -107,7 +107,7 @@ public class TaskManager {
 
     }
 
-    public void POSTImageService(final Task task, final OnImagePostExecuteListener onImagePostExecuteListener) {
+    public void POSTImageService(Task task, final OnImagePostExecuteListener onImagePostExecuteListener) {
         File image = new File(context.getFilesDir(), task.getImageContent());
         final String FILE_NAME = "/Users/nathanpark/Desktop/" + image.getName();
         RequestBody requestBody = new MultipartBody.Builder()
@@ -123,7 +123,7 @@ public class TaskManager {
         okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
-
+                Toast.makeText(context, "이미지전송실패", Toast.LENGTH_SHORT).show();
             }
 
             @Override

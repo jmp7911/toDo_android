@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -43,17 +44,22 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_UPDATE) {
             if (resultCode == RESULT_OK) {
                 final int position = data.getIntExtra(EXTRA_POSITION, NO_EXTRA_DATA);
-                Task task = data.getParcelableExtra(EXTRA_TASK);
+                final Task task = data.getParcelableExtra(EXTRA_TASK);
                 if (!task.getImageContent().equals("null")) {
                     String imageContent = fileManager.writeToInternalStorage(task.getImageContent());
                     task.setImageContent(imageContent);
-                    ServerImageManager serverImageManager = new ServerImageManager(getApplicationContext());
-                    serverImageManager.execute(POST, imageContent);
                 }
-                taskManager.setTask(task, position, new OnPutTaskListener() {
+                taskManager.POSTImageService(task, new OnImagePostExecuteListener() {
                     @Override
-                    public void onPutTask() {
-                        taskAdapter.notifyItemChanged(position);
+                    public void onPostExecute(String fileName) {
+                        fileManager.renameFile(task.getImageContent(), fileName);
+                        task.setImageContent(fileName);
+                        taskManager.setTask(task, position, new OnPutTaskListener() {
+                            @Override
+                            public void onPutTask() {
+                                taskAdapter.notifyItemChanged(position);
+                            }
+                        });
                     }
                 });
             } else {
@@ -69,8 +75,10 @@ public class MainActivity extends AppCompatActivity {
                 taskManager.POSTImageService(task, new OnImagePostExecuteListener() {
                     @Override
                     public void onPostExecute(String fileName) {
-                        fileManager.renameFile(task.getImageContent(), fileName);
-                        task.setImageContent(fileName);
+                        if (!fileName.equals("null")) {
+                            fileManager.renameFile(task.getImageContent(), fileName);
+                            task.setImageContent(fileName);
+                        }
                         taskManager.addTask(task, new OnPostTaskListener() {
                             @Override
                             public void onPostTask() {

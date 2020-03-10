@@ -51,9 +51,7 @@ public class ServerImageManager extends AsyncTask<String, Void, String> {
             Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
         } else {
             if (requestMethod.equals(GET)) {
-                Log.d("uploadmessage", "onPostExecute: "+result);
             } else if (requestMethod.equals(POST)) {
-                Log.d("uploadmessage", "onPostExecute: "+result);
             }
         }
     }
