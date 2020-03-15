@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -21,11 +20,8 @@ import com.jmp.todo.iface.OnPutTaskListener;
 import com.jmp.todo.iface.OnSetTasksListener;
 import com.jmp.todo.iface.OnPostTaskListener;
 import com.jmp.todo.model.ImageFileManager;
-import com.jmp.todo.model.ServerImageManager;
 import com.jmp.todo.model.Task;
 import com.jmp.todo.model.TaskManager;
-
-import static com.jmp.todo.model.TaskManager.POST;
 
 
 public class MainActivity extends AppCompatActivity {

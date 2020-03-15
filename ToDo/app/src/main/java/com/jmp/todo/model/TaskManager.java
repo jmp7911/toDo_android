@@ -43,7 +43,7 @@ public class TaskManager {
     private ArrayList<Task> tasks;
     private Retrofit retrofit;
     private APIService apiService;
-    private final String BASE_URL = "http://todo-android-study.herokuapp.com";
+    public static final String BASE_URL = "http://todo-android-study.herokuapp.com";
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String PUT = "PUT";
@@ -158,12 +158,6 @@ public class TaskManager {
             public void onResponse(Call<ArrayList<Task>> call, Response<ArrayList<Task>> response) {
                 tasks = response.body();
                 onSetTasksListener.onSetTasks();
-                for (Task task : tasks) {
-                    if (!task.getImageContent().equals("null")){
-                        ServerImageManager serverImageManager = new ServerImageManager(context);
-                        serverImageManager.execute(GET, task.getImageContent());
-                    }
-                }
             }
 
             @Override

@@ -18,18 +18,6 @@ public class ImageFileManager {
     public ImageFileManager(Context context) {
         this.context = context;
     }
-    public void writeToInternalStorage(Bitmap image, String imageName) {
-        try {
-            FileOutputStream fos = context.openFileOutput(imageName, Context.MODE_PRIVATE);
-            image.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     public String writeToInternalStorage(String imageContent) {
         String imageName = createName();
         try {
