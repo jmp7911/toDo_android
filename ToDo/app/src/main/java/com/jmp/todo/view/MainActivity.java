@@ -42,6 +42,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_POSITION = "position";
     public static final int NO_EXTRA_DATA = -1;
 
+    private OnPostTaskListener onPostTaskListener = new OnPostTaskListener() {
+        @Override
+        public void onPostTask() {
+            taskAdapter.notifyItemInserted(taskManager.getTasks().size());
+        }
+    };
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -66,6 +73,13 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                     serverImageManager.execute(POST, imageContent);
+                } else {
+                    taskManager.setTask(task, position, new OnPutTaskListener() {
+                        @Override
+                        public void onPutTask() {
+                            taskAdapter.notifyItemChanged(position);
+                        }
+                    });
                 }
             } else {
                 Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
@@ -81,15 +95,12 @@ public class MainActivity extends AppCompatActivity {
                         public void onPostExecute(String fileName) {
                             fileManager.renameFile(task.getImageContent(), fileName);
                             task.setImageContent(fileName);
-                            taskManager.addTask(task, new OnPostTaskListener() {
-                                @Override
-                                public void onPostTask() {
-                                    taskAdapter.notifyItemInserted(taskManager.getTasks().size());
-                                }
-                            });
+                            taskManager.addTask(task, onPostTaskListener);
                         }
                     });
                     serverImageManager.execute(POST, imageContent);
+                } else {
+                    taskManager.addTask(task, onPostTaskListener);
                 }
 
             } else {
